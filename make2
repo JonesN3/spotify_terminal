@@ -1,0 +1,33 @@
+CFLAGS=-Wall
+LIBS=-lrt
+CC=gcc
+CNUM=insertcandidatenumberhere
+
+all: main
+
+main: main.o \
+      irq.o \
+      l1_phys.o l2_link.o l3_net.o l4_trans.o l5_app.o \
+      delayed_sendto.o receiver.o util.o
+	  ${CC} ${CFLAGS} -o main $^ ${LIBS}
+
+%.o: %.c
+	gcc ${CFLAGS} -c -Wall $^
+
+debug: CFLAGS+=-DDEBUG -g
+debug: all
+
+clean:
+	rm *.o main
+
+realclean: clean
+	rm -f *~ ${CNUM}.tgz
+	rm -rf doc ${CNUM}
+
+handin:
+	rm -rf ${CNUM}
+	mkdir ${CNUM}
+	cp -r Makefile design.pdf *.c *.h ${CNUM}
+	tar --numeric-owner --owner=0 --group=0 -cvzf ${CNUM}.tgz ${CNUM}
+
+
