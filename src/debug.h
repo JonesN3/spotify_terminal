@@ -9,7 +9,7 @@
 #define debug(debugstr, ...) \
     do{\
 if(strlen(debugstr) > 2) {\
-fprintf(stderr,"%-10s line: %-4d %20s: %s ",  __FILE__, __LINE__, __func__, COLOR_BLUE);\
+fprintf(stderr,"%-10s line: %-4d %30s: %s ",  __FILE__, __LINE__, __func__, COLOR_BLUE);\
 }\
 fprintf(stderr, debugstr"\n%s", ##__VA_ARGS__, COLOR_END);\
     } while(0)

@@ -2,3 +2,4 @@
 
 int handler(sp_session *session);
 int handler_menu(void);
+void quit(void);
