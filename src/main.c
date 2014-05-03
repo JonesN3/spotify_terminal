@@ -20,11 +20,11 @@ sp_session *g_session;
 extern const uint8_t g_appkey[];
 extern const size_t g_appkey_size;
 static sp_session_callbacks callbacks;
+int next_timeout = 0;
 
 /**
  * Note quite sure where to place these parts
  */
-
 static void SP_CALLCONV logged_in(sp_session *session, sp_error error)
 {
     debug("Callback on_login");
@@ -39,7 +39,7 @@ static void SP_CALLCONV logged_in(sp_session *session, sp_error error)
 
 static int on_music_delivered(sp_session *session, const sp_audioformat *format, const void *frames, int num_frames)
 {
-    debug("Callback on_music_deliverd");
+    //debug("Callback on_music_deliverd");
 	audio_fifo_t *af = &g_audiofifo;
 	audio_fifo_data_t *afd;
 	size_t s;
@@ -78,7 +78,7 @@ static int on_music_delivered(sp_session *session, const sp_audioformat *format,
 
 static void SP_CALLCONV notify_main_thread(sp_session *session)
 {
-	debug("callback: on_main_thread_notified");
+	//debug("callback: on_main_thread_notified");
 }
 
 
@@ -89,8 +89,11 @@ static void on_log(sp_session *session, const char *data)
 
 static void on_end_of_track(sp_session *session)
 {
+    debug("callback: on end of track");
 	audio_fifo_flush(&g_audiofifo);
 	sp_session_player_play(session, 0);
+    g_playing = 0;
+    g_process_running = 0;
 }
 
 
@@ -102,6 +105,7 @@ int main(void)
     get_user_info();
     printf("User: '%s'\n", username);
     log_in();
+    sp_session_process_events(g_session, &next_timeout);
     handler(g_session);
     return 1;
 }

@@ -1,4 +1,4 @@
 /* declaration of methods */
-static void on_search_complete(sp_search *search, void *userdata);
+extern int g_process_running;
 void run_search(sp_session *session);
 

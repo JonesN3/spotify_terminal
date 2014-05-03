@@ -7,8 +7,11 @@
 #include "search.h"
 #include "play.h"
 
+static void SP_CALLCONV search_complete(sp_search *search, void *userdata);
+
 void run_search(sp_session *session)
 {
+    g_process_running = 1;
 	// ask the user for an artist and track
 	printf("\n--Search and play--\n");
 	char artist[1024];
@@ -27,12 +30,12 @@ void run_search(sp_session *session)
 
 	// start the search
 	sp_search_create(session, q, 0, 1, 0, 0, 0, 0, 0, 0, SP_SEARCH_STANDARD,
-			&on_search_complete, session);
+			&search_complete, session);
 }
 
-static void on_search_complete(sp_search *search, void *userdata)
+static void SP_CALLCONV search_complete(sp_search *search, void *userdata)
 {
-    debug("on_search_complete");
+    debug("callback: search is complete");
 	//g_menuChoice = -1;
 	sp_error error = sp_search_error(search);
 	if (error != SP_ERROR_OK) {
