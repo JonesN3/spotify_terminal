@@ -3,63 +3,53 @@
 #include "main.h"
 #include "handler.h"
 #include "search.h"
+#include "playlist.h"
 
 int g_menuChoice;
 int g_playing;
 int g_process_running;
+int next_timeout2 = 0;
 
 int handler(sp_session *session)
 {
     printf("\nHandler \n");
-    int next_timeout = 5000;
     int index;
+    int playlist_num;
+    char input[256];
     int selection = 0;
-    char input[100];
+    selection = handler_menu(session);
 
-    selection = 0; //g_menuChoice;
-    if(g_menuChoice == -1 || g_menuChoice == 9) selection = handler_menu();
-    g_menuChoice = selection;
-    if(selection == 0) quit();
-
-    while(1) {
-        //signal(SIGINT, intHandler);
-        sp_session_process_events(session, &next_timeout);
-
-        if(!g_process_running) {
-            if(selection == -1) handler(session);
-            if(g_menuChoice == -1 || g_menuChoice == 9) handler(session);
-
-            if(selection == 1)
-            { 
-                run_search(session);
-            }else if(selection == 2) {
-                printf("playlist play test\n");
-                //testPlaylistPlay(session, 0);
-            } else if(selection == 3) {
-                //printPlaylists(g_session);
-            } else if(selection == 4) {
-                fputs("Playlist number: ", stdout);
-                fgets(input, sizeof(input) - 1, stdin);
-                sscanf(input, "%d", &index);
-                //listSongsInPlaylist(session, index);
-            } else if(selection == 5) {
-                //playthatlist();
-            } else if(selection == 6) {
-                printf("Shuffle and play");
-                //g_shuffleMode2 = 1;
-                //playthatlist();
-            } else {
-                printf("\nerror: illegal menu choice\n");
-                g_menuChoice = 9;
-
-            }
-        }
+    if(selection == 1)
+    { 
+        run_search(session);
+        g_playing = 1;
+    }else if(selection == 2) {
+        printf("playlist play test\n");
+        //testPlaylistPlay(session, 0);
+    } else if(selection == 3) {
+        //printPlaylists(g_session);
+    } else if(selection == 4) {
+        //sp_playlist* pl = playlist_find_by_num();
+        //listSongsInPlaylist(session, pl);
+    } else if(selection == 5) {
+        sp_playlist* pl = playlist_find_by_num();
+        playthatlist(pl, session);
+    } else if(selection == 6) {
+        printf("Shuffle and play");
+        //g_shuffleMode2 = 1;
+        //playthatlist();
+    } else {
+        printf("\nerror: illegal menu choice\n");
+        g_menuChoice = 9;
     }
+    g_menuChoice = -1;
+    return selection;
 }
 
 
-int handler_menu(void)
+int handler_menu(sp_session *session)
 {
+    sp_session_process_events(session, &next_timeout2);
     int selected;
     if(g_menuChoice == 9)
     {
@@ -74,6 +64,8 @@ int handler_menu(void)
         printf("9: help\n");
     }
 
+
+    sp_session_process_events(session, &next_timeout2);
     char input[100];
     fputs("> ", stdout);
     fgets(input, sizeof(input) - 1, stdin);
