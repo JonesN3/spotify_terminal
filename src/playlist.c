@@ -68,7 +68,6 @@ void playthatlist(sp_session *session, sp_playlist* pl)
         printf("This track is not loaded\n");
     }
 
-
     play(session, sp_playlist_track(pl, 0));
 }
 

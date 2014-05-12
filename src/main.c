@@ -128,7 +128,7 @@ static void logged_in(sp_session *session, sp_error error)
     sp_playlistcontainer_add_callbacks( pc, &pc_callbacks, NULL);
 
     g_logged_in = 1;
-    printf("logged in");
+    printf("logged in\n");
 }
 
 static int music_delivered(sp_session *session, 
@@ -173,7 +173,7 @@ static int music_delivered(sp_session *session,
 
 static void notify_main_thread(sp_session *session)
 {
-    debug("callback: on_main_thread_notified");
+    //debug("callback: on_main_thread_notified");
 }
 
 
@@ -291,49 +291,13 @@ void check_playlist_status(sp_playlist *playlist)
     printf("number of tracks %d\n", sp_playlist_num_tracks(playlist));
 }
 
-int handler(sp_session* session, sp_playlistcontainer* pc)
+void print_commands()
 {
-    printf("\nHandler \n");
-    int index;
-    int playlist_num;
-    char input[256];
-    int selection = 0;
-    selection = handler_menu(session);
-
-    if(selection == 1)
-    { 
-        run_search(session);
-        g_playing = 1;
-    }else if(selection == 2) {
-        printf("playlist play test\n");
-        //testPlaylistPlay(session, 0);
-    } else if(selection == 3) {
-        print_playlists(g_session, pc);
-    } else if(selection == 4) {
-        sp_playlist* pl = playlist_find_by_num(session, pc);
-        print_tracks_in_playlist(session, pl);
-    } else if(selection == 5) {
-        g_playing = 1;
-        sp_playlist* pl = playlist_find_by_num(session, pc);
-        g_playlist = pl;
-        if(pl == NULL) {
-            printf("playlist not ready!");
-            g_playing = 0;
-            return;
-        }
-        playlist_loading = 1;
-        check_playlist_status(pl);
-        sp_playlist_add_callbacks(pl, &pl_callbacks, NULL);
-        playthatlist(pl, session);
-        return;
-    } else if(selection == 6) {
-        printf("Shuffle and play");
-        //g_shuffleMode2 = 1;
-        //playthatlist();
-    } else {
-        printf("\nerror: illegal menu choice\n");
-    }
-    return selection;
+    printf("Spotify_terminal, commands:\n" 
+            "'search'    - Search by artist and or song\n"
+            "'list' 'ls' - List playlist for user\n"
+            "'help'      - Print this\n"
+            "\n");
 }
  
 void handle_keyboard() 
@@ -343,11 +307,26 @@ void handle_keyboard()
     char* retval;
 
     retval = fgets(buffer, sizeof(buffer), stdin);
+    debug("buffer is %s\n", buffer);
+    strtok(buffer, "\n");
+    notify_events = 1;
 
-    if (strstr(buffer, "search") != NULL) {
-       int ret; 
+    if (strcmp(buffer, "search") == 0) {
+       run_search(g_session);
 
-       ret = sscanf(buffer, "search song %s", in_buffer);
+    } else if ((strcmp(buffer, "list") == 0) || (strcmp(buffer, "ls") == 0 )) {
+        print_playlists(g_session, pc);
+
+    } else if (strcmp(buffer, "list songs") == 0 ) { 
+        sp_playlist* pl = playlist_find_by_num(g_session, pc);
+        print_tracks_in_playlist(g_session, pl);
+        
+    } else if (strcmp(buffer, "help") == 0) {
+        print_commands();
+
+    } else if (strcmp(buffer, "play playlist") == 0) {
+        sp_playlist* pl = playlist_find_by_num(g_session, pc);
+        playthatlist(g_session, pl);
     }
 }
 
@@ -356,6 +335,7 @@ int main(void)
 {
     int selection;
     int select_ret;
+    fd_set  read_set;
 
     struct timeval tv;
 
@@ -371,13 +351,13 @@ int main(void)
 
     /* i will make a select loop */
     while(g_logged_in) {
-        fd_set = read_set;
+        //fd_set = read_set;
         
         FD_ZERO( &read_set );
         FD_SET(STDIN_FILENO, &read_set); /* keyboard input */
 
         tv.tv_sec = 0;
-        tv.tv_user = 1000000;
+        tv.tv_usec = 1000000;
         select_ret = select ( 1, &read_set, 0, 0, &tv );
 
         switch(select_ret) 
@@ -388,12 +368,59 @@ int main(void)
             
             case 0 :
                 /* nothing has happend on the keyboard, timeout expired? */
+                /*debug("case 0 %d ", notify_events);
+                if(next_timeout == 0) {
+                    while(!notify_events && g_playing) {
+                        debug("while(!notify_events && g_playing");
+                        pthread_cond_wait(&notify_cond, &notify_mutex);
+                    }
+                } else {
+                    struct timespec tv;
+                    clock_gettime(CLOCK_REALTIME, &tv);
+
+                    tv.tv_sec += next_timeout / 1000;
+                    tv.tv_nsec += (next_timeout % 1000) * 1000000;
+                    if(tv.tv_nsec > 1000000000) {
+                        tv.tv_sec ++;
+                        tv.tv_nsec -= 1000000000;
+                    }
+                    while(!notify_events && g_playing) {
+                        debug("while(!notify_events && g_playing2");
+                        printf("in while 2\n");
+                        if(pthread_cond_timedwait(&notify_cond, &notify_mutex, &tv));
+                        break;
+                        printf("while2\n");
+                    }
+                    debug("after while 2\n");
+                }*/
+
+                /*
+                if(!g_playing) {
+                    pthread_mutex_unlock(&notify_mutex);
+                    //handler(g_session, pc);
+                    pthread_mutex_lock(&notify_mutex);
+                }*/
+
+
+                /* Process libspotify events */
+                notify_events = 0;
+                pthread_mutex_unlock(&notify_mutex);
+
+                do {
+                    debug("do, while(next_timeout == 0)");
+                    sp_session_process_events(g_session, &next_timeout);
+                    if( playlist_loading )check_playlist_status(g_playlist);
+                } while (next_timeout == 0);
+
+                pthread_mutex_lock(&notify_mutex);
+                if( playlist_loading )check_playlist_status(g_playlist);
 
             default :
-                if( FD_ISSET (STDIN_FILENO, &read_set)) handle(); 
-                    
+                debug("default");
+                if( FD_ISSET (STDIN_FILENO, &read_set)) handle_keyboard(); 
+
         }
-    
+
     }
 
     /* *
@@ -402,53 +429,7 @@ int main(void)
      * */
     while(g_logged_in) {
         debug("main loop start");
-        if(next_timeout == 0) {
-            while(!notify_events && g_playing) {
-                pthread_cond_wait(&notify_cond, &notify_mutex);
-            }
-        } else {
-            struct timespec tv;
-            clock_gettime(CLOCK_REALTIME, &tv);
 
-            /*
-               struct timeval ts;
-               gettimeofday(&ts, NULL);
-               TIMEVAL_TO_TIMESPEC(&ts, &tv);
-               */
-
-            tv.tv_sec += next_timeout / 1000;
-            tv.tv_nsec += (next_timeout % 1000) * 1000000;
-            if(tv.tv_nsec > 1000000000) {
-                tv.tv_sec ++;
-                tv.tv_nsec -= 1000000000;
-            }
-            while(!notify_events && g_playing) {
-                if(pthread_cond_timedwait(&notify_cond, &notify_mutex, &tv));
-                break;
-            }
-        }
-
-        /* take in process argument from user */
-        if(!g_playing) {
-            pthread_mutex_unlock(&notify_mutex);
-            /* do things */
-            handler(g_session, pc);
-            pthread_mutex_lock(&notify_mutex);
-        }
-
-        /* Process libspotify events */
-        notify_events = 0;
-        pthread_mutex_unlock(&notify_mutex);
-
-        do {
-            debug("main notify 3");
-            sp_session_process_events(g_session, &next_timeout);
-            if( playlist_loading )check_playlist_status(g_playlist);
-        } while (next_timeout == 0);
-
-        pthread_mutex_lock(&notify_mutex);
-        if( playlist_loading )check_playlist_status(g_playlist);
-        debug("main loop end");
     }
     /** 
      * TODO: exit program stuff, or make we never get here
