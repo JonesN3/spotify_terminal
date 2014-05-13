@@ -23,6 +23,6 @@ that you installed it to '~/usr/local/lib', with the command
 
 If you stilled it into the home folder, you have to update some PATHS, if you already haven't
 
-<code>export PKG_CONFIG_PATH=$HOME/local/lib/pkgconfig/</code>
+<code>export PKG_CONFIG_PATH=$HOME/local/lib/pkgconfig:$PKG_CONFIG_PATH</code>
 
-<code>export LD_LIBRARY_PATH=$HOME/local/lib<code>
+<code>export LD_LIBRARY_PATH=$HOME/local/lib:$LD_LIBRARY_PATH</code>
