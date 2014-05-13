@@ -5,10 +5,15 @@
 #include "play.h"
 #include "debug.h"
 
+#define TRUE 1
+#define FALSE 0
+
 //static sp_playlistcontainer_callbacks pc_callbacks;
 sp_playlist *current_playlist;
 int playlist_tracks, playlist_index;
 extern sp_session *g_session; 
+
+extern int playlist_playing;
 
 int print_playlists(sp_session *g_session, sp_playlistcontainer* pc) 
 {
@@ -41,9 +46,6 @@ void print_tracks_in_playlist(sp_session *session, sp_playlist* playlist)
 		track = sp_playlist_track(playlist, i);
 		printf("\n%d. %s", i, sp_track_name(track));
 	}
-
-
-
 }
 
 void playthatlist(sp_session *session, sp_playlist* pl)
@@ -55,6 +57,8 @@ void playthatlist(sp_session *session, sp_playlist* pl)
         printf("Playlist is not loaded!");
         return;
     }
+
+    playlist_playing = TRUE;
     
     debug("playlist loaded");
 
@@ -69,6 +73,16 @@ void playthatlist(sp_session *session, sp_playlist* pl)
     }
 
     play(session, sp_playlist_track(pl, 0));
+}
+
+void playlist_go_next(sp_session *session, sp_playlist* pl, int index)
+{
+    if(index > sp_playlist_num_tracks(pl)) {
+        printf("no more tracks in playlist");
+        playlist_playing = FALSE;
+        return;
+    }
+    play(session, sp_playlist_track(pl, index+1)); 
 }
 
 sp_playlist* playlist_find_by_num(sp_session *session, sp_playlistcontainer* pc)

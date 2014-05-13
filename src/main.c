@@ -16,6 +16,10 @@
 #include "playlist.h"
 
 #include <libspotify/api.h>
+#define TRUE 1
+#define FALSE 0
+
+
 void check_login();
 char *username;
 char *password;
@@ -44,6 +48,10 @@ static pthread_cond_t promt_cond;
 int next_timeout = 0;
 int g_logged_in = 0;
 int playlist_loading = 0;
+
+int playlist_playing = 0;
+int playlist_index;
+int shuffle_mode = 0;
 
 sp_playlistcontainer* playlist_container;
 
@@ -188,6 +196,8 @@ static void on_end_of_track(sp_session *session)
     audio_fifo_flush(&g_audiofifo);
     sp_session_player_play(session, 0);
     notify_main_thread(g_session);
+
+    if(playlist_playing) playlist_go_next(g_session, g_playlist, ++playlist_index);
     g_playing = 0;
     g_process_running = 0;
 }
@@ -294,9 +304,10 @@ void check_playlist_status(sp_playlist *playlist)
 void print_commands()
 {
     printf("Spotify_terminal, commands:\n" 
-            "'search'    - Search by artist and or song\n"
-            "'list' 'ls' - List playlist for user\n"
-            "'help'      - Print this\n"
+            "'search'        - Search by artist and or song\n"
+            "'list' 'ls'     - List playlist for user\n"
+            "'play playlist' - Select and play a playlist (by number)\n"
+            "'help'          - Print this\n"
             "\n");
 }
  
@@ -324,9 +335,17 @@ void handle_keyboard()
     } else if (strcmp(buffer, "help") == 0) {
         print_commands();
 
-    } else if (strcmp(buffer, "play playlist") == 0) {
+    } else if (strcmp(buffer, "play playlist") == 0 || strcmp(buffer, "play") == 0 ) {
         sp_playlist* pl = playlist_find_by_num(g_session, pc);
         playthatlist(g_session, pl);
+    } else if (strcmp(buffer, "suffle play") == 0) {
+
+    } else if (strcmp(buffer, "shuffle mode") == 0) {
+
+    } else if (strcmp(buffer, "next" == 0)) {
+
+    } else if (strcmp(buffer, "stop" == 0)) {
+
     }
 }
 
