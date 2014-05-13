@@ -5,7 +5,7 @@ A project to create a simple, but fuctional terminal spotify client for a linux 
 Dependencies
 ------------
 This program depends on libspotify, a C api develpoed by spotify. 
-Download from [here](https://developer.spotify.com/technologies/libspotify/#libspotify-downloads)
+Download from [here](https://developer.spotify.com/technologies/libspotify/#libspotify-downloads).
 More info on how to manage libspotify in 'Libspotify_howto' below.
 
 Build and run
