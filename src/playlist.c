@@ -14,6 +14,8 @@ int playlist_tracks, playlist_index;
 extern sp_session *g_session; 
 
 extern int playlist_playing;
+extern int shuffle_mode;
+int *g_shuffle_array;
 
 int print_playlists(sp_session *g_session, sp_playlistcontainer* pc) 
 {
@@ -71,18 +73,24 @@ void playthatlist(sp_session *session, sp_playlist* pl)
     } else {
         printf("This track is not loaded\n");
     }
-
+    
+    shuffle(pl);
     play(session, sp_playlist_track(pl, 0));
 }
 
 void playlist_go_next(sp_session *session, sp_playlist* pl, int index)
 {
-    if(index > sp_playlist_num_tracks(pl)) {
-        printf("no more tracks in playlist");
+    if(index < 0) {
+        printf("This is the first track, can't prev!\n\n");
+        return;
+    }
+    if(index > sp_playlist_num_tracks(pl)-1) {
+        printf("no more tracks in playlist\n\n");
         playlist_playing = FALSE;
         return;
     }
-    play(session, sp_playlist_track(pl, index+1)); 
+    if(shuffle_mode) play(session, sp_playlist_track(pl, g_shuffle_array[index]));
+    else play(session, sp_playlist_track(pl, index)); 
 }
 
 sp_playlist* playlist_find_by_num(sp_session *session, sp_playlistcontainer* pc)
@@ -106,6 +114,32 @@ sp_playlist* playlist_find_by_num(sp_session *session, sp_playlistcontainer* pc)
     } else debug("found playlist %s\n", sp_playlist_name(find));
 
     return find;
+}
+
+void shuffle(sp_playlist* playlist) 
+{
+    int size = sp_playlist_num_tracks(playlist);
+    int i = 0, random, tmp;
+    int ascending[size];
+    int shuffled[size];
+
+    g_shuffle_array = malloc(size * sizeof(int));	
+
+    for(i = 0; i < size; ++i) {
+        ascending[i] = i;
+    }
+
+    //shuffle the numbers
+    for(i = size-1; i > 0; i--) {
+        random = rand() % size;
+        tmp = ascending[i];
+        ascending[i] = ascending[random];
+        ascending[random] = tmp;
+    }
+
+    for(i = 0; i < size; i++) {
+        g_shuffle_array[i] = ascending[i];
+    }
 }
 
 void playlist_find_by_name(char* name)

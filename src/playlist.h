@@ -5,3 +5,4 @@ sp_playlist* playlist_find_by_num(sp_session *session, sp_playlistcontainer* pc)
 void playlist_init(sp_session* session);
 void print_tracks_in_playlist(sp_session *session, sp_playlist* pl);
 void playlist_go_next(sp_session *session, sp_playlist* pl, int index);
+void shuffle(sp_playlist* playlist); 

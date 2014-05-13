@@ -53,6 +53,8 @@ int playlist_playing = 0;
 int playlist_index;
 int shuffle_mode = 0;
 
+int *g_shuffle_array;
+
 sp_playlistcontainer* playlist_container;
 
 /**
@@ -307,6 +309,7 @@ void print_commands()
             "'search'        - Search by artist and or song\n"
             "'list' 'ls'     - List playlist for user\n"
             "'play playlist' - Select and play a playlist (by number)\n"
+            "'next' 'n'      - Go to next track in playlist\n"
             "'help'          - Print this\n"
             "\n");
 }
@@ -320,6 +323,7 @@ void handle_keyboard()
     retval = fgets(buffer, sizeof(buffer), stdin);
     debug("buffer is %s\n", buffer);
     strtok(buffer, "\n");
+    printf("\r\r");
     notify_events = 1;
 
     if (strcmp(buffer, "search") == 0) {
@@ -337,15 +341,29 @@ void handle_keyboard()
 
     } else if (strcmp(buffer, "play playlist") == 0 || strcmp(buffer, "play") == 0 ) {
         sp_playlist* pl = playlist_find_by_num(g_session, pc);
-        playthatlist(g_session, pl);
-    } else if (strcmp(buffer, "suffle play") == 0) {
+        g_playlist = pl;
+        playthatlist(g_session, g_playlist);
+    } else if (strcmp(buffer, "shuffle play") == 0 || strcmp(buffer, "shuffle") == 0) {
+        shuffle_mode = 1;
+        sp_playlist* pl = playlist_find_by_num(g_session, pc);
+        g_playlist = pl;
+        playthatlist(g_session, g_playlist);
 
     } else if (strcmp(buffer, "shuffle mode") == 0) {
 
-    } else if (strcmp(buffer, "next" == 0)) {
+    } else if (strcmp(buffer, "next") == 0 || strcmp(buffer, "n") == 0) {
+        if(!playlist_playing) {
+            printf("There is no playlist playing!\n\n");
+            return;
+        }
+        on_end_of_track(g_session);
+        //playlist_go_next(g_session, g_playlist, ++playlist_index);
+    } else if (strcmp(buffer, "stop") == 0) {
 
-    } else if (strcmp(buffer, "stop" == 0)) {
-
+    } else if (strcmp(buffer, "info") == 0) {
+        play_info();
+    } else {
+        printf("\rUnkown command!");
     }
 }
 
@@ -358,7 +376,6 @@ int main(void)
 
     struct timeval tv;
 
-    g_logged_in = 1;
     printf("Welcome to spotify_terminal\n");
     printf("Using libspotify %s\n", sp_build_id());
     debug("testing debug");
@@ -366,12 +383,12 @@ int main(void)
     get_user_info();
     printf("User: '%s'\n", username);
     log_in();
-    //sp_session_process_events(g_session, &next_timeout);
+    sp_session_process_events(g_session, &next_timeout);
+    printf("ready\n");
 
     /* i will make a select loop */
     while(g_logged_in) {
         //fd_set = read_set;
-        
         FD_ZERO( &read_set );
         FD_SET(STDIN_FILENO, &read_set); /* keyboard input */
 
