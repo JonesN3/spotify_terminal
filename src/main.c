@@ -382,13 +382,7 @@ int main(void)
     init();
     get_user_info();
     printf("User: '%s'\n", username);
-    
     log_in();
-    if(!g_logged_in){
-        printf("We was unable to log you in. Sorry :(\n");
-        return -1;
-    }
-
     sp_session_process_events(g_session, &next_timeout);
     printf("ready\n");
 
