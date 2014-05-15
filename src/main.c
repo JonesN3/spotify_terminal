@@ -127,6 +127,7 @@ static sp_playlistcontainer_callbacks pc_callbacks = {
 static void logged_in(sp_session *session, sp_error error)
 {
     debug("Callback on_login");
+    printf("callback login\n");
     if (error != SP_ERROR_OK) 
     {
         fprintf(stderr, "Error: unable to log in: %s\n", sp_error_message(error));
@@ -189,6 +190,7 @@ static void notify_main_thread(sp_session *session)
 
 static void on_log(sp_session *session, const char *data)
 {
+    printf("log callback: >%s\n", data);
     // this method is *very* verbose, so this data should really be written out to a log file
 }
 
@@ -204,11 +206,24 @@ static void on_end_of_track(sp_session *session)
     g_process_running = 0;
 }
 
+static void message_to_user(sp_session *s, const char* msg)
+{
+    printf("message to user: >%s<\n", msg);
+}
+
+static void connection_error(sp_session *s, sp_error error)
+{
+    printf("callback connection_error\n");
+    if(error != SP_ERROR_OK) printf("connection error\n");
+}
+
 /* Register session callbacks */
 static sp_session_callbacks session_callbacks = {
     .logged_in = &logged_in,
     .notify_main_thread = &notify_main_thread,
     .music_delivery = &music_delivered,
+    .message_to_user = &message_to_user,
+    .connection_error = &connection_error,
     .log_message = &on_log,
     .end_of_track = &on_end_of_track,
 };
@@ -280,7 +295,7 @@ int log_in(void)
 {
     /* Use the session to log in */
     sp_session_login(g_session, username, password, 0, NULL);
-    pthread_mutex_lock(&notify_mutex);
+    //pthread_mutex_lock(&notify_mutex);
     return 1;
 }
 
@@ -387,7 +402,7 @@ int main(void)
     printf("ready\n");
 
     /* i will make a select loop */
-    while(g_logged_in) {
+    while(1) {
         //fd_set = read_set;
         FD_ZERO( &read_set );
         FD_SET(STDIN_FILENO, &read_set); /* keyboard input */
@@ -471,6 +486,11 @@ int main(void)
      * TODO: exit program stuff, or make we never get here
      * and do exit program stuff another place 
      */
+    sp_session_process_events(g_session, &next_timeout);
+    sp_session_process_events(g_session, &next_timeout);
+    sp_session_process_events(g_session, &next_timeout);
+    sp_session_process_events(g_session, &next_timeout);
+    sp_session_process_events(g_session, &next_timeout);
     printf("Exiting..\n");
     return 1;
 }
