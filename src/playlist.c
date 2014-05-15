@@ -16,6 +16,7 @@ extern sp_session *g_session;
 extern int playlist_playing;
 extern int shuffle_mode;
 int *g_shuffle_array;
+int next_timeout;
 
 int print_playlists(sp_session *g_session, sp_playlistcontainer* pc) 
 {
@@ -55,8 +56,8 @@ void playthatlist(sp_session *session, sp_playlist* pl)
     printf("\nPlay that playlist!\n");
     sp_error error;
 
-       if(!sp_playlist_is_loaded(pl)) {
-        printf("Playlist is not loaded!");
+    if(!sp_playlist_is_loaded(pl)) {
+        printf("Playlist is not loaded!\n");
         return;
     }
 
@@ -67,15 +68,9 @@ void playthatlist(sp_session *session, sp_playlist* pl)
     debug("playing playlist '%s'", sp_playlist_name(pl));
 
     sp_track* track = sp_playlist_track(pl, 0);
-
-    if(sp_track_is_loaded(track)) {
-        printf("This track is loaded\n");
-    } else {
-        printf("This track is not loaded\n");
-    }
-    
     shuffle(pl);
-    play(session, sp_playlist_track(pl, 0));
+    
+    playlist_play_track(session, track);
 }
 
 void playlist_go_next(sp_session *session, sp_playlist* pl, int index)
@@ -85,12 +80,31 @@ void playlist_go_next(sp_session *session, sp_playlist* pl, int index)
         return;
     }
     if(index > sp_playlist_num_tracks(pl)-1) {
-        printf("no more tracks in playlist\n\n");
+        printf("no more tracks in playlist, last track: %d\n\n", index);
         playlist_playing = FALSE;
         return;
     }
     if(shuffle_mode) play(session, sp_playlist_track(pl, g_shuffle_array[index]));
-    else play(session, sp_playlist_track(pl, index)); 
+    else playlist_play_track(session, sp_playlist_track(pl, index)); 
+}
+
+void playlist_play_track(sp_session* session, sp_track *track)
+{
+    if(sp_track_is_loaded(track)) {
+        printf("This track is loaded\n");
+    } else {
+        printf("This track is not loaded\n");
+        FILE* f = fopen("log.spotify", "a");
+        fprintf(f, "## track was not ready, here i needed to load it\n");
+        fclose(f);
+        printf("Waiting for track to load. This is a one time thing.\n");
+    }
+
+    while(!sp_track_is_loaded(track)) {
+        sp_session_process_events(session, &next_timeout);
+    }
+    
+    play(session, track);
 }
 
 sp_playlist* playlist_find_by_num(sp_session *session, sp_playlistcontainer* pc)
