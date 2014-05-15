@@ -126,7 +126,6 @@ static sp_playlistcontainer_callbacks pc_callbacks = {
 /* -- Session callbacks -- */
 static void logged_in(sp_session *session, sp_error error)
 {
-    debug("Callback on_login");
     printf("callback login\n");
     if (error != SP_ERROR_OK) 
     {
@@ -344,12 +343,59 @@ void player_reset()
     shuffle_mode = FALSE;
     playlist_playing = FALSE;
 }
+
+void set_active_playlist(sp_playlist *pl)
+{
+    g_playlist = pl;
+    playthatlist(g_session, g_playlist);
+}
+
+void parse_play_command(char *buffer)
+{
+    sp_playlist *playlist = NULL;
+
+    /* If plain play command */
+    if(strlen(buffer) <= strlen("play ")){
+        playlist = playlist_find_by_num(g_session, pc);
+        if(playlist != NULL){
+            set_active_playlist(playlist);
+            return;
+        }
+    }
+
+    char playlist_name_buffer[1024];
+    /* Check playlist name first */
+    if(sscanf(buffer, "play %s", playlist_name_buffer) == 1){
+        playlist = playlist_find_by_name(pc, buffer + strlen("play "));
+        if(playlist != NULL){
+            set_active_playlist(playlist);
+            return;
+        }
+    }
+
+    /* Playlist name not found. Fallback on index */
+    int playlist_id;
+    if(sscanf( buffer, "play %d", &playlist_id ) == 1){
+        printf("Match index!\n");
+       playlist = playlist_play_by_index(g_session, pc, playlist_id);
+        if(playlist != NULL){
+            set_active_playlist(playlist);
+            return;
+        }else {
+             printf("Could not find a playlist with id '%d'\n", playlist_id );
+            return;
+        }
+    }
+
+    printf("Could not find a playlist with name '%s'\n", buffer + strlen("play ") );
+}
  
 void handle_keyboard() 
 {
     char buffer[1024];
     char in_buffer[1024];
     char* retval;
+
 
     retval = fgets(buffer, sizeof(buffer), stdin);
     debug("buffer is %s\n", buffer);
@@ -384,7 +430,10 @@ void handle_keyboard()
         playthatlist(g_session, g_playlist);
 
     } else if (strcmp(buffer, "shuffle mode") == 0) {
-
+  
+    }else if(strncmp(buffer, "play", strlen("play")) == 0){
+        parse_play_command(buffer);
+    
     } else if (strcmp(buffer, "next") == 0 || strcmp(buffer, "n") == 0) {
         if(!playlist_playing) {
             printf("There is no playlist playing!\n\n");
@@ -397,7 +446,7 @@ void handle_keyboard()
     } else if (strcmp(buffer, "info") == 0) {
         play_info();
     } else if (strcmp(buffer, "exit") == 0) {
-        shutdown();
+            shutdown();        
     } else {
         printf("\rUnkown command!");
     }
@@ -515,7 +564,7 @@ int main(void)
     sp_session_process_events(g_session, &next_timeout);
     sp_session_process_events(g_session, &next_timeout);
     sp_session_process_events(g_session, &next_timeout);
-    sp_session_process_events(g_session, &next_timeout);
+    sp_session_process_events(g_session, &next_timeout);     
     printf("Exiting..\n");
     return 1;
 }
