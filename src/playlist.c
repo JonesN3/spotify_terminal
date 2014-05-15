@@ -107,6 +107,19 @@ void playlist_play_track(sp_session* session, sp_track *track)
     play(session, track);
 }
 
+sp_playlist* playlist_play_by_index(sp_session *session, sp_playlistcontainer *pc, int index)
+{
+    sp_playlist *find = NULL;
+    find = sp_playlistcontainer_playlist(pc, index);
+
+    if(!sp_playlist_is_loaded(find)){
+        return NULL;
+    }
+    return find;
+
+}
+
+
 sp_playlist* playlist_find_by_num(sp_session *session, sp_playlistcontainer* pc)
 {
     debug("find playlist by index");
@@ -156,7 +169,26 @@ void shuffle(sp_playlist* playlist)
     }
 }
 
-void playlist_find_by_name(char* name)
-{
 
+sp_playlist* playlist_find_by_name(sp_playlistcontainer *pc, char *name)
+{
+    int pc_length = sp_playlistcontainer_num_playlists(pc);
+    if(pc_length < 0){
+        return NULL;
+    }
+
+    sp_playlist *sp = NULL;
+    int i;
+    for(i = 0; i < pc_length; i++){
+        sp = sp_playlistcontainer_playlist(pc, i);
+        if(sp_playlist_is_loaded(sp)){
+            
+            /* Compare name */
+            if(strcmp(name, sp_playlist_name(sp)) == 0){
+                printf("Match on %s\n", sp_playlist_name(sp));
+                return sp;
+            }
+        }
+    }
+    return NULL;
 }
