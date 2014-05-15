@@ -190,7 +190,7 @@ static void notify_main_thread(sp_session *session)
 
 static void on_log(sp_session *session, const char *data)
 {
-    printf("log callback: >%s\n", data);
+    debug("log callback: >%s\n", data);
     // this method is *very* verbose, so this data should really be written out to a log file
 }
 
