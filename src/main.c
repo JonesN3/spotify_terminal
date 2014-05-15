@@ -126,7 +126,7 @@ static sp_playlistcontainer_callbacks pc_callbacks = {
 /* -- Session callbacks -- */
 static void logged_in(sp_session *session, sp_error error)
 {
-    debug("Callback on_login");
+    printf("callback login\n");
     if (error != SP_ERROR_OK) 
     {
         fprintf(stderr, "Error: unable to log in: %s\n", sp_error_message(error));
@@ -183,7 +183,14 @@ static int music_delivered(sp_session *session,
 
 static void notify_main_thread(sp_session *session)
 {
-    //debug("callback: on_main_thread_notified");
+    FILE *file;
+    int file_exsists = 0;
+
+    file = fopen("log.spotify", "a");
+    fprintf(file, "%s", data);
+    fclose(file);
+
+    debug("log callback: >%s\n", data);
 }
 
 
@@ -204,11 +211,24 @@ static void on_end_of_track(sp_session *session)
     g_process_running = 0;
 }
 
+static void message_to_user(sp_session *s, const char* msg)
+{
+    printf("message to user: >%s<\n", msg);
+}
+
+static void connection_error(sp_session *s, sp_error error)
+{
+    printf("callback connection_error\n");
+    if(error != SP_ERROR_OK) printf("connection error\n");
+}
+
 /* Register session callbacks */
 static sp_session_callbacks session_callbacks = {
     .logged_in = &logged_in,
     .notify_main_thread = &notify_main_thread,
     .music_delivery = &music_delivered,
+    .message_to_user = &message_to_user,
+    .connection_error = &connection_error,
     .log_message = &on_log,
     .end_of_track = &on_end_of_track,
 };
@@ -228,6 +248,8 @@ static sp_session_config session_config = {
 /* initializes some needed variables */
 void init(void) 
 {
+    FILE *f = fopen("log.spotify", "wb");
+
     sp_error error;
     sp_session *session;
 
@@ -280,7 +302,7 @@ int log_in(void)
 {
     /* Use the session to log in */
     sp_session_login(g_session, username, password, 0, NULL);
-    pthread_mutex_lock(&notify_mutex);
+    //pthread_mutex_lock(&notify_mutex);
     return 1;
 }
 
@@ -306,12 +328,19 @@ void check_playlist_status(sp_playlist *playlist)
 void print_commands()
 {
     printf("Spotify_terminal, commands:\n" 
-            "'search'        - Search by artist and or song\n"
+            "'search'        - Search by artist and/or song\n"
             "'list' 'ls'     - List playlist for user\n"
-            "'play playlist' - Select and play a playlist (by number)\n"
+            "'play'          - Select and play a playlist (by number)\n"
             "'next' 'n'      - Go to next track in playlist\n"
             "'help'          - Print this\n"
             "\n");
+}
+
+void player_reset()
+{
+    playlist_index = 0;
+    shuffle_mode = FALSE;
+    playlist_playing = FALSE;
 }
 
 void set_active_playlist(sp_playlist *pl)
@@ -374,6 +403,7 @@ void handle_keyboard()
     notify_events = 1;
 
     if (strcmp(buffer, "search") == 0) {
+        player_reset();
        run_search(g_session);
 
     } else if ((strcmp(buffer, "list") == 0) || (strcmp(buffer, "ls") == 0 )) {
@@ -386,17 +416,23 @@ void handle_keyboard()
     } else if (strcmp(buffer, "help") == 0) {
         print_commands();
 
-    }else if(strncmp(buffer, "play", strlen("play")) == 0){
-        parse_play_command(buffer);
-    
-    }else if (strcmp(buffer, "shuffle play") == 0 || strcmp(buffer, "shuffle") == 0) {
+    } else if (strcmp(buffer, "play playlist") == 0 || strcmp(buffer, "play") == 0 ) {
+        player_reset();
+        sp_playlist* pl = playlist_find_by_num(g_session, pc);
+        g_playlist = pl;
+        playthatlist(g_session, g_playlist);
+    } else if (strcmp(buffer, "shuffle play") == 0 || strcmp(buffer, "shuffle") == 0) {
+        player_reset();
         shuffle_mode = 1;
         sp_playlist* pl = playlist_find_by_num(g_session, pc);
         g_playlist = pl;
         playthatlist(g_session, g_playlist);
 
     } else if (strcmp(buffer, "shuffle mode") == 0) {
-
+  
+    }else if(strncmp(buffer, "play", strlen("play")) == 0){
+        parse_play_command(buffer);
+    
     } else if (strcmp(buffer, "next") == 0 || strcmp(buffer, "n") == 0) {
         if(!playlist_playing) {
             printf("There is no playlist playing!\n\n");
@@ -408,11 +444,17 @@ void handle_keyboard()
 
     } else if (strcmp(buffer, "info") == 0) {
         play_info();
+    } else if (strcmp(buffer, "exit") == 0) {
+            shutdown();        
     } else {
         printf("\rUnkown command!");
     }
 }
 
+void shutdown()
+{
+
+}
 
 int main(void)
 {
@@ -433,7 +475,7 @@ int main(void)
     printf("ready\n");
 
     /* i will make a select loop */
-    while(g_logged_in) {
+    while(1) {
         //fd_set = read_set;
         FD_ZERO( &read_set );
         FD_SET(STDIN_FILENO, &read_set); /* keyboard input */
@@ -517,6 +559,11 @@ int main(void)
      * TODO: exit program stuff, or make we never get here
      * and do exit program stuff another place 
      */
+    sp_session_process_events(g_session, &next_timeout);
+    sp_session_process_events(g_session, &next_timeout);
+    sp_session_process_events(g_session, &next_timeout);
+    sp_session_process_events(g_session, &next_timeout);
+    sp_session_process_events(g_session, &next_timeout);     
     printf("Exiting..\n");
     return 1;
 }
