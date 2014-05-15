@@ -4,6 +4,10 @@
 #include "play.h"
 
 sp_track* current_track; 
+extern int playlist_playing;
+extern int playlist_index;
+extern int shuffle_mode;
+extern sp_playlist* g_playlist;
 
 void play(sp_session *session, sp_track *track)
 {
@@ -33,20 +37,17 @@ void play_info()
     artist = sp_track_artist(current_track, 0);
 
     printf("\033[2J\033[1;1H");
-    ftruncate(1,0); /* you probably want this as well */
-    /*clearing terminal output*/
-    //fputs("\033[A\033[2K\033[A\033[2K",stdout);
-    //rewind(stdout);
-    //ftruncate(1,4); /* you probably want this as well */
-    /*clearing terminal output*/
-    //fputs("\033[A\033[2K\033[A\033[2K",stdout);
-    //rewind(stdout);
-    //ftruncate(1,0); /* you probably want this as well */
+    printf("Spotify_terminal\n");
+    printf("Using libspotify %s\n\n", sp_build_id());
 
 
- 
     char ESC=27;
     printf("## Playing ##\n");
+    if(shuffle_mode) printf("Shuffle mode\n");
+    if(playlist_playing){ 
+        printf("Playlist: %s", sp_playlist_name(g_playlist));
+        printf(" (%d/%d) \n\n", playlist_index+1, sp_playlist_num_tracks(g_playlist)); 
+    }
     printf("%c[1m",ESC);  /*- turn on bold */
     printf("%s\n", sp_track_name(current_track));
     printf("%c[0m",ESC); /* turn off bold */

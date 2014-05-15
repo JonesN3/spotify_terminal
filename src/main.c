@@ -190,6 +190,13 @@ static void notify_main_thread(sp_session *session)
 
 static void on_log(sp_session *session, const char *data)
 {
+    FILE *file;
+    int file_exsists = 0;
+
+    file = fopen("log.spotify", "a");
+    fprintf(file, "%s", data);
+    fclose(file);
+
     debug("log callback: >%s\n", data);
     // this method is *very* verbose, so this data should really be written out to a log file
 }
@@ -243,6 +250,8 @@ static sp_session_config session_config = {
 /* initializes some needed variables */
 void init(void) 
 {
+    FILE *f = fopen("log.spotify", "wb");
+
     sp_error error;
     sp_session *session;
 
@@ -321,12 +330,19 @@ void check_playlist_status(sp_playlist *playlist)
 void print_commands()
 {
     printf("Spotify_terminal, commands:\n" 
-            "'search'        - Search by artist and or song\n"
+            "'search'        - Search by artist and/or song\n"
             "'list' 'ls'     - List playlist for user\n"
-            "'play playlist' - Select and play a playlist (by number)\n"
+            "'play'          - Select and play a playlist (by number)\n"
             "'next' 'n'      - Go to next track in playlist\n"
             "'help'          - Print this\n"
             "\n");
+}
+
+void player_reset()
+{
+    playlist_index = 0;
+    shuffle_mode = FALSE;
+    playlist_playing = FALSE;
 }
  
 void handle_keyboard() 
@@ -342,6 +358,7 @@ void handle_keyboard()
     notify_events = 1;
 
     if (strcmp(buffer, "search") == 0) {
+        player_reset();
        run_search(g_session);
 
     } else if ((strcmp(buffer, "list") == 0) || (strcmp(buffer, "ls") == 0 )) {
@@ -355,10 +372,12 @@ void handle_keyboard()
         print_commands();
 
     } else if (strcmp(buffer, "play playlist") == 0 || strcmp(buffer, "play") == 0 ) {
+        player_reset();
         sp_playlist* pl = playlist_find_by_num(g_session, pc);
         g_playlist = pl;
         playthatlist(g_session, g_playlist);
     } else if (strcmp(buffer, "shuffle play") == 0 || strcmp(buffer, "shuffle") == 0) {
+        player_reset();
         shuffle_mode = 1;
         sp_playlist* pl = playlist_find_by_num(g_session, pc);
         g_playlist = pl;
@@ -377,11 +396,17 @@ void handle_keyboard()
 
     } else if (strcmp(buffer, "info") == 0) {
         play_info();
+    } else if (strcmp(buffer, "exit") == 0) {
+        shutdown();
     } else {
         printf("\rUnkown command!");
     }
 }
 
+void shutdown()
+{
+
+}
 
 int main(void)
 {
