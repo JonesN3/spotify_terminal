@@ -183,6 +183,12 @@ static int music_delivered(sp_session *session,
 
 static void notify_main_thread(sp_session *session)
 {
+    //debug("callback: on_main_thread_notified");
+}
+
+
+static void on_log(sp_session *session, const char *data)
+{
     FILE *file;
     int file_exsists = 0;
 
@@ -191,11 +197,6 @@ static void notify_main_thread(sp_session *session)
     fclose(file);
 
     debug("log callback: >%s\n", data);
-}
-
-
-static void on_log(sp_session *session, const char *data)
-{
     // this method is *very* verbose, so this data should really be written out to a log file
 }
 
