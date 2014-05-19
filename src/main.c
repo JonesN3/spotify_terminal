@@ -452,9 +452,9 @@ void handle_keyboard()
 
     } else if (strcmp(buffer, "info") == 0) {
         play_info();
-    } else if (strcmp(buffer, "exit") == 0) {
+    } else if (strcmp(buffer, "quit") == 0) {
         printf("Command is exit!\n");
-        shutdown();
+        quit_program();
     } else {
         printf("Unkown command!");
         return;
@@ -462,7 +462,7 @@ void handle_keyboard()
     return;
 }
 
-void shutdown()
+void quit_program()
 {
     printf("Logging out..\n");
     //sp_session_logout(g_session);
