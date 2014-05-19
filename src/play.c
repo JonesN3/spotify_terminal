@@ -39,7 +39,6 @@ void player_pause(sp_session *session)
         sp_session_player_play(session, 1);
         playing = 1;
     }
-    printf("\b\b");
 }
 
 void play_info()
