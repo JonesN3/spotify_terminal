@@ -5,7 +5,6 @@
 #include <sys/time.h>
 
 #include <sys/select.h>
-#include <ncurses.h>
 
 #include "string.h"
 #include "debug.h"
@@ -227,7 +226,6 @@ static void connection_error(sp_session *s, sp_error error)
 static void logged_out(sp_session *s)
 {
     printf("User has been logged out, shuting down\n");
-    printw("User has been logged out, shuting down\n");
     exit(1);
 }
 /* Register session callbacks */
@@ -361,17 +359,12 @@ void set_active_playlist(sp_playlist *pl)
 
 void parse_play_command(int type, char *buffer)
 {
+    printf("parse play command");
     sp_playlist *playlist = NULL;
-    char *command = "NONE";
-    if(type == PLAY) command = "play";
-    if(type == SHUFFLE) command = "shuffle"; 
 
     char tmp[25];
     char *tok;
     tok = strchr(buffer, ' ');
-
-    printf("tok: %s\n", tok);
-    printf("buf: %s\n", buffer);
 
     /* If plain play command */
     if(tok == NULL) {
@@ -405,6 +398,7 @@ void parse_play_command(int type, char *buffer)
         }
     }
     printf("Could not find a playlist with name '%s'\n", buffer + strlen("play ") );
+    return;
 }
  
 void handle_keyboard() 
@@ -415,9 +409,8 @@ void handle_keyboard()
 
 
     retval = fgets(buffer, sizeof(buffer), stdin);
-    debug("buffer is %s\n", buffer);
+    printf("buffer is %s\n", buffer);
     strtok(buffer, "\n");
-    printf("\r\r");
     notify_events = 1;
 
     if (strcmp(buffer, "search") == 0) {
@@ -435,11 +428,14 @@ void handle_keyboard()
         print_commands();
 
     } else if (strcmp(buffer, "shuffle mode") == 0) {
-  
+        print_commands(); 
+
     }else if(strncmp(buffer, "play", strlen("play")) == 0){
+        player_reset();
         parse_play_command(PLAY, buffer);
 
     }else if(strncmp(buffer, "shuffle", strlen("shuffle")) == 0){
+        player_reset();
         shuffle_mode = TRUE;
         parse_play_command(PLAY, buffer);
 
@@ -457,19 +453,21 @@ void handle_keyboard()
     } else if (strcmp(buffer, "info") == 0) {
         play_info();
     } else if (strcmp(buffer, "exit") == 0) {
+        printf("Command is exit!\n");
         shutdown();
-    } else if (strstr(buffer, "play") != NULL) {
-            shutdown();        
     } else {
-        printf("\rUnkown command!");
+        printf("Unkown command!");
+        return;
     }
+    return;
 }
 
 void shutdown()
 {
-    //sp_session_release(g_session);
-    printf("exiting..\n");
-    sp_session_logout(g_session);
+    printf("Logging out..\n");
+    //sp_session_logout(g_session);
+    printf("Goodbyte\n");
+    //exit(2);
 }
 
 int main(void)
@@ -567,7 +565,7 @@ int main(void)
      * TODO: exit program stuff, or make we never get here
      * and do exit program stuff another place 
      */
-    printf("Exiting..\n");
+    printf("Exiting.. (error) \n");
     return 1;
 }
 
