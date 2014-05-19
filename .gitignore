@@ -3,3 +3,4 @@ build/
 tmp/*.swp
 *.swp
 spot
+log.spotify
