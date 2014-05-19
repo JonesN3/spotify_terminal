@@ -73,6 +73,11 @@ void playthatlist(sp_session *session, sp_playlist* pl)
     playlist_play_track(session, track);
 }
 
+int play_song_in_playlist(sp_session *session, int playlist, int index)
+{
+
+}
+
 void playlist_go_next(sp_session *session, sp_playlist* pl, int index)
 {
     if(index < 0) {

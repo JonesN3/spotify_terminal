@@ -465,9 +465,9 @@ void handle_keyboard()
 void quit_program()
 {
     printf("Logging out..\n");
-    //sp_session_logout(g_session);
+    sp_session_logout(g_session);
     printf("Goodbyte\n");
-    //exit(2);
+    /exit(2);
 }
 
 int main(void)
