@@ -1,6 +1,7 @@
 spotify_terminal
 ================
 A project to create a simple, but fuctional terminal spotify client for a linux enviorment. 
+The project is in early development, and cannot be considered stable!
 
 Dependencies
 ------------
