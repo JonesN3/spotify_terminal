@@ -22,7 +22,6 @@
 #define PLAY 2
 #define SHUFFLE 3 
 
-
 void check_login();
 char *username;
 char *password;
