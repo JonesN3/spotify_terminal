@@ -129,11 +129,7 @@ static sp_playlistcontainer_callbacks pc_callbacks = {
 /* -- Session callbacks -- */
 static void logged_in(sp_session *session, sp_error error)
 {
-<<<<<<< HEAD
     debug("Callback on_login");
-=======
-    printf("callback login\n");
->>>>>>> ef4d7defb7670d151f42b654016c7b15a3477e49
     if (error != SP_ERROR_OK) 
     {
         fprintf(stderr, "Error: unable to log in: %s\n", sp_error_message(error));
@@ -461,13 +457,9 @@ void handle_keyboard()
     } else if (strcmp(buffer, "info") == 0) {
         play_info();
     } else if (strcmp(buffer, "exit") == 0) {
-<<<<<<< HEAD
         shutdown();
     } else if (strstr(buffer, "play") != NULL) {
-
-=======
             shutdown();        
->>>>>>> ef4d7defb7670d151f42b654016c7b15a3477e49
     } else {
         printf("\rUnkown command!");
     }
