@@ -8,12 +8,14 @@ extern int playlist_playing;
 extern int playlist_index;
 extern int shuffle_mode;
 extern sp_playlist* g_playlist;
+int playing = 0;
 
 void play(sp_session *session, sp_track *track)
 {
     debug("in player");
     sp_error error;
     g_playing = 1;
+    playing = 1;
     debug("loading track into player");
 	error = sp_session_player_load(session, track);
 	if (error != SP_ERROR_OK) {
@@ -28,6 +30,18 @@ void play(sp_session *session, sp_track *track)
     play_info();
 }
 
+void player_pause(sp_session *session)
+{
+    if(playing == 1) {
+        sp_session_player_play(session, 0);
+        playing = 0;
+    } else if(playing == 0) {
+        sp_session_player_play(session, 1);
+        playing = 1;
+    }
+    printf("\b\b");
+}
+
 void play_info()
 {
     sp_album *album;
@@ -39,7 +53,6 @@ void play_info()
     printf("\033[2J\033[1;1H");
     printf("Spotify_terminal\n");
     printf("Using libspotify %s\n\n", sp_build_id());
-
 
     char ESC=27;
     printf("## Playing ##\n");

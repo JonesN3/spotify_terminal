@@ -1,7 +1,7 @@
 CC      := gcc
 PKGS	:= libspotify alsa
-CFLAGS  := -g -Wall `pkg-config --cflags $(PKGS)`
-LIBS    := `pkg-config --libs $(PKGS)` -lpthread
+CFLAGS  := -g -Wall -lncurses `pkg-config --cflags $(PKGS)`
+LIBS    := `pkg-config --libs $(PKGS)` -lpthread -lncurses
 
 TARGET	:= spot
 SOURCES := $(wildcard  src/*.c )

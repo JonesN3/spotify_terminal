@@ -5,6 +5,7 @@
 #include <sys/time.h>
 
 #include <sys/select.h>
+#include <ncurses.h>
 
 #include "string.h"
 #include "debug.h"
@@ -127,7 +128,6 @@ static sp_playlistcontainer_callbacks pc_callbacks = {
 static void logged_in(sp_session *session, sp_error error)
 {
     debug("Callback on_login");
-    printf("callback login\n");
     if (error != SP_ERROR_OK) 
     {
         fprintf(stderr, "Error: unable to log in: %s\n", sp_error_message(error));
@@ -135,9 +135,7 @@ static void logged_in(sp_session *session, sp_error error)
     }
 
     pc = sp_session_playlistcontainer(session);
-
     sp_playlistcontainer_add_callbacks( pc, &pc_callbacks, NULL);
-
     g_logged_in = 1;
     printf("logged in\n");
 }
@@ -224,6 +222,12 @@ static void connection_error(sp_session *s, sp_error error)
     if(error != SP_ERROR_OK) printf("connection error\n");
 }
 
+static void logged_out(sp_session *s)
+{
+    printf("User has been logged out, shuting down\n");
+    printw("User has been logged out, shuting down\n");
+    exit(1);
+}
 /* Register session callbacks */
 static sp_session_callbacks session_callbacks = {
     .logged_in = &logged_in,
@@ -233,6 +237,7 @@ static sp_session_callbacks session_callbacks = {
     .connection_error = &connection_error,
     .log_message = &on_log,
     .end_of_track = &on_end_of_track,
+    .logged_out = &logged_out,
 };
 
 /* Register session config */
@@ -385,6 +390,8 @@ void handle_keyboard()
 
     } else if (strcmp(buffer, "shuffle mode") == 0) {
 
+    } else if(strcmp(buffer, "pause") == 0 || strcmp(buffer, "p") == 0) {
+        player_pause(g_session);
     } else if (strcmp(buffer, "next") == 0 || strcmp(buffer, "n") == 0) {
         if(!playlist_playing) {
             printf("There is no playlist playing!\n\n");
@@ -398,6 +405,8 @@ void handle_keyboard()
         play_info();
     } else if (strcmp(buffer, "exit") == 0) {
         shutdown();
+    } else if (strstr(buffer, "play") != NULL) {
+
     } else {
         printf("\rUnkown command!");
     }
@@ -405,7 +414,9 @@ void handle_keyboard()
 
 void shutdown()
 {
-
+    //sp_session_release(g_session);
+    printf("exiting..\n");
+    sp_session_logout(g_session);
 }
 
 int main(void)
@@ -499,23 +510,10 @@ int main(void)
 
     }
 
-    /* *
-     * the main program loop 
-     * TODO: explain this shit!
-     * */
-    while(g_logged_in) {
-        debug("main loop start");
-
-    }
     /** 
      * TODO: exit program stuff, or make we never get here
      * and do exit program stuff another place 
      */
-    sp_session_process_events(g_session, &next_timeout);
-    sp_session_process_events(g_session, &next_timeout);
-    sp_session_process_events(g_session, &next_timeout);
-    sp_session_process_events(g_session, &next_timeout);
-    sp_session_process_events(g_session, &next_timeout);
     printf("Exiting..\n");
     return 1;
 }
