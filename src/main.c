@@ -128,11 +128,7 @@ static sp_playlistcontainer_callbacks pc_callbacks = {
 /* -- Session callbacks -- */
 static void logged_in(sp_session *session, sp_error error)
 {
-<<<<<<< HEAD
     debug("Callback on_login");
-=======
-    printf("callback login\n");
->>>>>>> ef4d7defb7670d151f42b654016c7b15a3477e49
     if (error != SP_ERROR_OK) 
     {
         fprintf(stderr, "Error: unable to log in: %s\n", sp_error_message(error));
@@ -460,13 +456,9 @@ void handle_keyboard()
     } else if (strcmp(buffer, "info") == 0) {
         play_info();
     } else if (strcmp(buffer, "exit") == 0) {
-<<<<<<< HEAD
         shutdown();
     } else if (strstr(buffer, "play") != NULL) {
-
-=======
-            shutdown();        
->>>>>>> ef4d7defb7670d151f42b654016c7b15a3477e49
+        shutdown();        
     } else {
         printf("\rUnkown command!");
     }
@@ -497,77 +489,30 @@ int main(void)
     sp_session_process_events(g_session, &next_timeout);
     printf("ready\n");
 
-    /* i will make a select loop */
+    initscr();
+    printw("ncurses\n");
+
+    int ch;
+    char buf[50];
+    nodelay(stdscr, TRUE);
+    
     while(1) {
-        //fd_set = read_set;
-        FD_ZERO( &read_set );
-        FD_SET(STDIN_FILENO, &read_set); /* keyboard input */
-
-        tv.tv_sec = 0;
-        tv.tv_usec = 1000000;
-        select_ret = select ( 1, &read_set, 0, 0, &tv );
-
-        switch(select_ret) 
-        {
-            case -1 :
-                printf("error in select");
+        if((ch == getch()) == ERR) {
+            /* nothing on keyboard */
+            printw("nothing on keyboard\n");
+            refresh();
+            sp_session_process_events(g_session, &next_timeout);
+        } else {
+            /* key has been pressed */
+            //printw("something on keyboard\n");
+            if(ch = KEY_ENTER) {
                 break;
-            
-            case 0 :
-                /* nothing has happend on the keyboard, timeout expired? */
-                /*debug("case 0 %d ", notify_events);
-                if(next_timeout == 0) {
-                    while(!notify_events && g_playing) {
-                        debug("while(!notify_events && g_playing");
-                        pthread_cond_wait(&notify_cond, &notify_mutex);
-                    }
-                } else {
-                    struct timespec tv;
-                    clock_gettime(CLOCK_REALTIME, &tv);
-
-                    tv.tv_sec += next_timeout / 1000;
-                    tv.tv_nsec += (next_timeout % 1000) * 1000000;
-                    if(tv.tv_nsec > 1000000000) {
-                        tv.tv_sec ++;
-                        tv.tv_nsec -= 1000000000;
-                    }
-                    while(!notify_events && g_playing) {
-                        debug("while(!notify_events && g_playing2");
-                        printf("in while 2\n");
-                        if(pthread_cond_timedwait(&notify_cond, &notify_mutex, &tv));
-                        break;
-                        printf("while2\n");
-                    }
-                    debug("after while 2\n");
-                }*/
-
-                /*
-                if(!g_playing) {
-                    pthread_mutex_unlock(&notify_mutex);
-                    //handler(g_session, pc);
-                    pthread_mutex_lock(&notify_mutex);
-                }*/
-
-
-                /* Process libspotify events */
-                notify_events = 0;
-                pthread_mutex_unlock(&notify_mutex);
-
-                do {
-                    debug("do, while(next_timeout == 0)");
-                    sp_session_process_events(g_session, &next_timeout);
-                    if( playlist_loading )check_playlist_status(g_playlist);
-                } while (next_timeout == 0);
-
-                pthread_mutex_lock(&notify_mutex);
-                if( playlist_loading )check_playlist_status(g_playlist);
-
-            default :
-                debug("default");
-                if( FD_ISSET (STDIN_FILENO, &read_set)) handle_keyboard(); 
-
+            }
+            getstr(buf);
+            mvprintw(LINES - 2, 0, "You Entered: %s", buf);
+            printw("%s", buf);
+            //refresh();
         }
-
     }
 
     /** 
