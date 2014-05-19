@@ -18,6 +18,8 @@
 #include <libspotify/api.h>
 #define TRUE 1
 #define FALSE 0
+#define PLAY 2
+#define SHUFFLE 3 
 
 
 void check_login();
@@ -250,6 +252,7 @@ static sp_session_config session_config = {
 void init(void) 
 {
     FILE *f = fopen("log.spotify", "wb");
+    fclose(f);
 
     sp_error error;
     sp_session *session;
@@ -350,43 +353,51 @@ void set_active_playlist(sp_playlist *pl)
     playthatlist(g_session, g_playlist);
 }
 
-void parse_play_command(char *buffer)
+void parse_play_command(int type, char *buffer)
 {
     sp_playlist *playlist = NULL;
+    char *command = "NONE";
+    if(type == PLAY) command = "play";
+    if(type == SHUFFLE) command = "shuffle"; 
+
+    char tmp[25];
+    char *tok;
+    tok = strchr(buffer, ' ');
+
+    printf("tok: %s\n", tok);
+    printf("buf: %s\n", buffer);
 
     /* If plain play command */
-    if(strlen(buffer) <= strlen("play ")){
+    if(tok == NULL) {
         playlist = playlist_find_by_num(g_session, pc);
         if(playlist != NULL){
             set_active_playlist(playlist);
             return;
         }
-    }
+        return;
+    } else tok = (tok +1);
 
     char playlist_name_buffer[1024];
     /* Check playlist name first */
-    if(sscanf(buffer, "play %s", playlist_name_buffer) == 1){
-        playlist = playlist_find_by_name(pc, buffer + strlen("play "));
-        if(playlist != NULL){
-            set_active_playlist(playlist);
-            return;
-        }
+    playlist = playlist_find_by_name(pc, tok);
+    if(playlist != NULL){
+        set_active_playlist(playlist);
+        return;
     }
 
     /* Playlist name not found. Fallback on index */
     int playlist_id;
-    if(sscanf( buffer, "play %d", &playlist_id ) == 1){
+    if(sscanf( tok, "%d", &playlist_id ) == 1){
         printf("Match index!\n");
-       playlist = playlist_play_by_index(g_session, pc, playlist_id);
+        playlist = playlist_play_by_index(g_session, pc, playlist_id);
         if(playlist != NULL){
             set_active_playlist(playlist);
             return;
         }else {
-             printf("Could not find a playlist with id '%d'\n", playlist_id );
+             printf("Playlist nr.'%d' is not ready!\n", playlist_id );
             return;
         }
     }
-
     printf("Could not find a playlist with name '%s'\n", buffer + strlen("play ") );
 }
  
@@ -417,23 +428,15 @@ void handle_keyboard()
     } else if (strcmp(buffer, "help") == 0) {
         print_commands();
 
-    } else if (strcmp(buffer, "play playlist") == 0 || strcmp(buffer, "play") == 0 ) {
-        player_reset();
-        sp_playlist* pl = playlist_find_by_num(g_session, pc);
-        g_playlist = pl;
-        playthatlist(g_session, g_playlist);
-    } else if (strcmp(buffer, "shuffle play") == 0 || strcmp(buffer, "shuffle") == 0) {
-        player_reset();
-        shuffle_mode = 1;
-        sp_playlist* pl = playlist_find_by_num(g_session, pc);
-        g_playlist = pl;
-        playthatlist(g_session, g_playlist);
-
     } else if (strcmp(buffer, "shuffle mode") == 0) {
   
     }else if(strncmp(buffer, "play", strlen("play")) == 0){
-        parse_play_command(buffer);
-    
+        parse_play_command(PLAY, buffer);
+
+    }else if(strncmp(buffer, "shuffle", strlen("shuffle")) == 0){
+        shuffle_mode = TRUE;
+        parse_play_command(PLAY, buffer);
+
     } else if (strcmp(buffer, "next") == 0 || strcmp(buffer, "n") == 0) {
         if(!playlist_playing) {
             printf("There is no playlist playing!\n\n");
@@ -560,11 +563,6 @@ int main(void)
      * TODO: exit program stuff, or make we never get here
      * and do exit program stuff another place 
      */
-    sp_session_process_events(g_session, &next_timeout);
-    sp_session_process_events(g_session, &next_timeout);
-    sp_session_process_events(g_session, &next_timeout);
-    sp_session_process_events(g_session, &next_timeout);
-    sp_session_process_events(g_session, &next_timeout);     
     printf("Exiting..\n");
     return 1;
 }

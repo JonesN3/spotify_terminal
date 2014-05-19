@@ -129,17 +129,23 @@ sp_playlist* playlist_find_by_num(sp_session *session, sp_playlistcontainer* pc)
     int index;
     fputs("Playlist number: ", stdout);
     fgets(input, sizeof(input) - 1, stdin);
-    printf("fgets is done\n");
+
     sscanf(input, "%d", &index);
-    printf("sscanf is done\n");
 
     find = sp_playlistcontainer_playlist(pc, index); 
 
+    if(find == NULL) {
+        printf("Error in loading playlist. It probably does not excist.\n");
+        return NULL;
+    }
+
     if(!sp_playlist_is_loaded(find)) {
         debug("playlist is not loaded");
+        printf("playlist is not loaded\n");
         return NULL;
     } else debug("found playlist %s\n", sp_playlist_name(find));
 
+    printf("playlist IS  loaded\n");
     return find;
 }
 
@@ -183,6 +189,7 @@ sp_playlist* playlist_find_by_name(sp_playlistcontainer *pc, char *name)
         sp = sp_playlistcontainer_playlist(pc, i);
         if(sp_playlist_is_loaded(sp)){
             
+            printf(">%s< ?= >%s<\n", name, sp_playlist_name(sp));
             /* Compare name */
             if(strcmp(name, sp_playlist_name(sp)) == 0){
                 printf("Match on %s\n", sp_playlist_name(sp));
