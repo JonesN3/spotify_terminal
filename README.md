@@ -9,6 +9,10 @@ This program depends on libspotify, a C api develpoed by spotify.
 Download from [here](https://developer.spotify.com/technologies/libspotify/#libspotify-downloads).
 More info on how to manage libspotify in 'Libspotify_howto' below.
 
+You will also need the 'asoundlib.h' library, read about it [here](http://www.alsa-project.org/alsa-doc/alsa-lib/files.html).
+This should be available from your distro's offical repositories.
+(Ubuntu/debian: 'libasound2-dev'. Arch: 'alsa-lib')
+
 Build and run
 -------------
 'make' for building the program. 'make debug' for building the program with debug outputs.
