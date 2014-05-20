@@ -1,4 +1,3 @@
-
 int print_playlists(sp_session *g_session, sp_playlistcontainer* pc); 
 void playthatlist(sp_session* session, sp_playlist* playlist); 
 sp_playlist* playlist_find_by_num(sp_session *session, sp_playlistcontainer* pc);

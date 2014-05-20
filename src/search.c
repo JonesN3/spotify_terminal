@@ -11,7 +11,6 @@ static void SP_CALLCONV search_complete(sp_search *search, void *userdata);
 
 void run_search(sp_session *session)
 {
-    g_process_running = 1;
 	// ask the user for an artist and track
 	printf("\n--Search and play--\n");
 	char artist[1024];
