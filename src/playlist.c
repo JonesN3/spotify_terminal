@@ -1,9 +1,4 @@
-#include <libspotify/api.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "playlist.h"
-#include "play.h"
-#include "debug.h"
+#include "includes.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -51,7 +46,7 @@ void print_tracks_in_playlist(sp_session *session, sp_playlist* playlist)
 	}
 }
 
-void playthatlist(sp_session *session, sp_playlist* pl)
+void playthatlist(sp_session *session, sp_playlist* pl, struct play_queue* node)
 {
     printf("\nPlay that playlist!\n");
 
@@ -68,11 +63,19 @@ void playthatlist(sp_session *session, sp_playlist* pl)
     shuffle(pl);
     
     playlist_play_track(session, track);
+    queue_add_playlist(node, pl);
 }
 
 int play_song_in_playlist(sp_session *session, int playlist, int index)
 {
     return -1;
+}
+
+void playqueue_go_next(sp_session *session, struct play_queue* node) 
+{
+    node = node->next;
+    playlist_play_track(session, node->track);
+
 }
 
 void playlist_go_next(sp_session *session, sp_playlist* pl, int index)

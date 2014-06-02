@@ -5,9 +5,11 @@
 #include <sys/time.h>
 
 #include <sys/select.h>
+#include <libspotify/api.h>
 
 #include "string.h"
 #include "debug.h"
+#include "play_queue.h"
 #include "main.h"
 #include "handler.h"
 #include "search.h"
@@ -16,7 +18,6 @@
 #include "playlist.h"
 #include "play.h"
 
-#include <libspotify/api.h>
 
 #define TRUE 1
 #define FALSE 0

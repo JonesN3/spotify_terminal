@@ -37,6 +37,7 @@ int *g_shuffle_array;
 
 /* a container with all the playlist we want */
 sp_playlistcontainer* playlist_container;
+struct play_queue *queue_entry = NULL;
 
 /**
  * About callbacks
@@ -58,7 +59,7 @@ static void tracks_added(sp_playlist *pl, sp_track * const *tracks,
         int num_tracks, int position, void *userdata)
 {
     printf("Callback tracks_added: %d tracks were added\n", num_tracks);
-    playthatlist(g_session, pl);
+    playthatlist(g_session, pl, queue_entry);
     fflush(stdout);
 }
 
@@ -194,7 +195,9 @@ static void on_end_of_track(sp_session *session)
     sp_session_player_play(session, 0);
     notify_main_thread(g_session);
 
-    if(playlist_playing) playlist_go_next(g_session, g_playlist, ++playlist_index);
+    playqueue_go_next(session, queue_entry); 
+
+    //if(playlist_playing) playlist_go_next(g_session, g_playlist, ++playlist_index);
 }
 
 static void message_to_user(sp_session *s, const char* msg)
@@ -255,6 +258,9 @@ void init(void)
     pthread_mutex_init(&notify_mutex, NULL);
     pthread_cond_init(&notify_cond, NULL);
     pthread_cond_init(&promt_cond, NULL);
+
+    queue_entry = malloc(sizeof(struct play_queue));
+    queue_entry->next = NULL;
 
     /* create the spotify session */
     error = sp_session_create(&session_config, &session);
@@ -359,7 +365,7 @@ int main(void)
 
             default :
                 debug("default");
-                if( FD_ISSET (STDIN_FILENO, &read_set)) handle_keyboard(g_session); 
+                if( FD_ISSET (STDIN_FILENO, &read_set)) handle_keyboard(g_session, queue_entry); 
         }
     }
 }

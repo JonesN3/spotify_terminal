@@ -1,6 +1,4 @@
 #include "includes.h"
-#include "playlist.h"
-#include "main.h"
 
 extern int playlist_index;
 extern int playlist_playing;
@@ -26,10 +24,10 @@ void player_reset()
     playlist_playing = FALSE;
 }
 
-void set_active_playlist(sp_session *session, sp_playlist *pl)
+void set_active_playlist(sp_session *session, sp_playlist *pl, struct play_queue* node)
 {
     g_playlist = pl;
-    playthatlist(session, g_playlist);
+    playthatlist(session, g_playlist, node);
 }
 
 /**
@@ -38,7 +36,7 @@ void set_active_playlist(sp_session *session, sp_playlist *pl)
  * if this fails, search for it by index instead,
  * for a number has been parsed
  */
-void parse_play_command(sp_session* session, char *buffer)
+void parse_play_command(sp_session* session, char *buffer, struct play_queue* node)
 {
     printf("parse play command");
     sp_playlist *playlist = NULL;
@@ -51,7 +49,7 @@ void parse_play_command(sp_session* session, char *buffer)
     if(tok == NULL) {
         playlist = playlist_find_by_num(session, pc);
         if(playlist != NULL){
-            set_active_playlist(session, playlist);
+            set_active_playlist(session, playlist, node);
             return;
         }
         return;
@@ -60,7 +58,7 @@ void parse_play_command(sp_session* session, char *buffer)
     /* Check playlist name first */
     playlist = playlist_find_by_name(pc, tok);
     if(playlist != NULL){
-        set_active_playlist(session, playlist);
+        set_active_playlist(session, playlist, node);
         return;
     }
 
@@ -70,7 +68,7 @@ void parse_play_command(sp_session* session, char *buffer)
         printf("Match index!\n");
         playlist = playlist_play_by_index(session, pc, playlist_id);
         if(playlist != NULL){
-            set_active_playlist(session, playlist);
+            set_active_playlist(session, playlist, node);
             return;
         }else {
              printf("Playlist nr.'%d' is not ready!\n", playlist_id );
@@ -81,7 +79,7 @@ void parse_play_command(sp_session* session, char *buffer)
     return;
 }
  
-void handle_keyboard(sp_session *session) 
+void handle_keyboard(sp_session *session, struct play_queue* node) 
 {
     char buffer[1024];
 
@@ -102,17 +100,20 @@ void handle_keyboard(sp_session *session)
     } else if (strcmp(buffer, "help") == 0) {
         print_commands();
 
+    } else if (strcmp(buffer, "queue") == 0) {
+        queue_print(node);
+
     } else if (strcmp(buffer, "shuffle mode") == 0) {
         print_commands(); 
 
     }else if(strncmp(buffer, "play", strlen("play")) == 0){
         player_reset();
-        parse_play_command(session, buffer);
+        parse_play_command(session, buffer, node);
 
     }else if(strncmp(buffer, "shuffle", strlen("shuffle")) == 0){
         player_reset();
         shuffle_mode = TRUE;
-        parse_play_command(session, buffer);
+        parse_play_command(session, buffer, node);
 
     } else if(strcmp(buffer, "pause") == 0 || strcmp(buffer, "p") == 0) {
         player_pause(session);
