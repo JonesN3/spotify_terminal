@@ -1,7 +1,4 @@
-#include <stdio.h>
-#include <libspotify/api.h>
-#include "debug.h"
-#include "play.h"
+#include "includes.h"
 
 sp_track* current_track; 
 extern int playlist_playing;
@@ -20,14 +17,12 @@ void play(sp_session *session, sp_track *track)
 	error = sp_session_player_load(session, track);
 	if (error != SP_ERROR_OK) {
 		fprintf(stderr, "\nError: %s\n", sp_error_message(error));
-		//printf("track: %s, artist: %s\n", sp_track_name(track), sp_artist_name(sp_track_artist(track, 0)));
-		//if (g_selectedList != NULL){ playlistGoNext(); printf("playing next song...\n\n");}
     }
 
     debug("calling sp_session_player_play");
     current_track = track;
 	sp_session_player_play(session, 1);
-    play_info();
+    //play_info();
 }
 
 void player_pause(sp_session *session)
@@ -42,7 +37,7 @@ void player_pause(sp_session *session)
     printf("\b\b");
 }
 
-void play_info()
+void play_info(struct play_queue *node)
 {
     sp_album *album;
     sp_artist *artist;
@@ -57,9 +52,8 @@ void play_info()
     char ESC=27;
     printf("## Playing ##\n");
     if(shuffle_mode) printf("Shuffle mode\n");
-    if(playlist_playing){ 
-        printf("Playlist: %s", sp_playlist_name(g_playlist));
-        printf(" (%d/%d) \n\n", playlist_index+1, sp_playlist_num_tracks(g_playlist)); 
+    if(node->playlist_name != "-1"){ 
+        //printf("Playlist: %s", sp_playlist_name(node->playlist_name));
     }
     printf("%c[1m",ESC);  /*- turn on bold */
     printf("%s\n", sp_track_name(current_track));
@@ -68,3 +62,22 @@ void play_info()
     printf("%s\n", sp_album_name(album));
     printf("\n");
 }
+
+void play_queue(sp_session *session, struct play_queue *node)
+{
+    sp_error error;
+    g_playing = 1;
+    playing = 1;
+
+	error = sp_session_player_load(session, node->track);
+	if (error != SP_ERROR_OK) {
+		fprintf(stderr, "\nError: %s\n", sp_error_message(error));
+    }
+
+    debug("calling sp_session_player_play");
+    current_track = node->track;
+	sp_session_player_play(session, 1);
+    play_info(node);
+}
+
+

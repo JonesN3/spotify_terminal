@@ -22,9 +22,20 @@ void queue_remove(int id)
 
 }
 
-void queue_add_first(sp_track *track)
+void queue_add_first(struct play_queue *node, sp_track *track)
 {
-
+    printf("adding '%s' to top of queue\n", sp_track_name(track));
+    struct play_queue *current = node;
+    struct play_queue *tmp = NULL;
+    
+    current = current->next;
+    tmp = malloc(sizeof(struct play_queue));
+    tmp->track = track;
+    tmp->id = id_tracker;
+    id_tracker++;
+    tmp->next = current->next;
+    current->next = tmp;
+    
 }
 
 void queue_add_playlist(struct play_queue *node, sp_playlist *playlist)

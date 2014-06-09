@@ -195,7 +195,7 @@ static void on_end_of_track(sp_session *session)
     sp_session_player_play(session, 0);
     notify_main_thread(g_session);
 
-    playqueue_go_next(session, queue_entry); 
+    playqueue_go_next(session, &queue_entry); 
 
     //if(playlist_playing) playlist_go_next(g_session, g_playlist, ++playlist_index);
 }

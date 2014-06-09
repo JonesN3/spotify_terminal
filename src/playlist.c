@@ -61,8 +61,10 @@ void playthatlist(sp_session *session, sp_playlist* pl, struct play_queue* node)
 
     sp_track* track = sp_playlist_track(pl, 0);
     shuffle(pl);
+    printf("asdfsadf\n");
     
     playlist_play_track(session, track);
+    printf("asdfsadf\n");
     queue_add_playlist(node, pl);
 }
 
@@ -71,11 +73,20 @@ int play_song_in_playlist(sp_session *session, int playlist, int index)
     return -1;
 }
 
-void playqueue_go_next(sp_session *session, struct play_queue* node) 
+void playqueue_go_next(sp_session *session, struct play_queue** node) 
 {
-    node = node->next;
-    playlist_play_track(session, node->track);
 
+    struct play_queue *current = *node;
+    struct play_queue *tmp = NULL;
+
+    //current = current->next;
+
+    tmp = current->next;
+    current->next = tmp->next;
+    free(tmp);
+
+    play_queue(session, current->next);
+    //playlist_play_track(session, current->next->track);
 }
 
 void playlist_go_next(sp_session *session, sp_playlist* pl, int index)
@@ -95,6 +106,7 @@ void playlist_go_next(sp_session *session, sp_playlist* pl, int index)
 
 void playlist_play_track(sp_session* session, sp_track *track)
 {
+    printf("playlist play track\n");
     if(sp_track_is_loaded(track)) {
         printf("This track is loaded\n");
     } else {
@@ -178,6 +190,16 @@ void shuffle(sp_playlist* playlist)
     }
 }
 
+sp_track* pl_find_song_by_id(sp_playlist* pl, int id)
+{
+    if(id > sp_playlist_num_tracks(pl)) {
+        printf("index too high\n");
+        return NULL;
+    }
+
+    sp_track* track = sp_playlist_track(pl, id);
+    return track;
+}
 
 sp_playlist* playlist_find_by_name(sp_playlistcontainer *pc, char *name)
 {

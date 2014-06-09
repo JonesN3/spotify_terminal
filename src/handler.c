@@ -27,7 +27,6 @@ void player_reset()
 void set_active_playlist(sp_session *session, sp_playlist *pl, struct play_queue* node)
 {
     g_playlist = pl;
-    playthatlist(session, g_playlist, node);
 }
 
 /**
@@ -36,7 +35,8 @@ void set_active_playlist(sp_session *session, sp_playlist *pl, struct play_queue
  * if this fails, search for it by index instead,
  * for a number has been parsed
  */
-void parse_play_command(sp_session* session, char *buffer, struct play_queue* node)
+sp_playlist* parse_play_command(sp_session* session, char *buffer,
+        struct play_queue* node)
 {
     printf("parse play command");
     sp_playlist *playlist = NULL;
@@ -50,16 +50,16 @@ void parse_play_command(sp_session* session, char *buffer, struct play_queue* no
         playlist = playlist_find_by_num(session, pc);
         if(playlist != NULL){
             set_active_playlist(session, playlist, node);
-            return;
+            return playlist;
         }
-        return;
+        return NULL;
     } else tok = (tok +1);
 
     /* Check playlist name first */
     playlist = playlist_find_by_name(pc, tok);
     if(playlist != NULL){
         set_active_playlist(session, playlist, node);
-        return;
+        return NULL;
     }
 
     /* Playlist name not found. Fallback on index */
@@ -69,14 +69,14 @@ void parse_play_command(sp_session* session, char *buffer, struct play_queue* no
         playlist = playlist_play_by_index(session, pc, playlist_id);
         if(playlist != NULL){
             set_active_playlist(session, playlist, node);
-            return;
+            return playlist;
         }else {
              printf("Playlist nr.'%d' is not ready!\n", playlist_id );
-            return;
+            return NULL;
         }
     }
     printf("Could not find a playlist with name '%s'\n", buffer + strlen("play ") );
-    return;
+    return NULL;
 }
  
 void handle_keyboard(sp_session *session, struct play_queue* node) 
@@ -93,6 +93,16 @@ void handle_keyboard(sp_session *session, struct play_queue* node)
     } else if ((strcmp(buffer, "list") == 0) || (strcmp(buffer, "ls") == 0 )) {
         print_playlists(session, pc);
 
+    } else if (strcmp(buffer, "queueadd") == 0) {
+        sp_playlist* pl = parse_play_command(session, buffer, node);
+        printf("done finding playlist \n");
+
+        if(pl != NULL) printf("queueadd: %s\n", sp_playlist_name(pl));
+        else{ printf("no playlist\n"); return; }
+
+        sp_track* track = pl_find_song_by_id(pl, 8);
+        if(track != NULL) queue_add_first(node, track);
+
     } else if (strcmp(buffer, "list songs") == 0 ) { 
         sp_playlist* pl = playlist_find_by_num(session, pc);
         print_tracks_in_playlist(session, pl);
@@ -108,12 +118,14 @@ void handle_keyboard(sp_session *session, struct play_queue* node)
 
     }else if(strncmp(buffer, "play", strlen("play")) == 0){
         player_reset();
-        parse_play_command(session, buffer, node);
+        sp_playlist* pl = parse_play_command(session, buffer, node);
+        playthatlist(session, pl, node);
 
     }else if(strncmp(buffer, "shuffle", strlen("shuffle")) == 0){
         player_reset();
         shuffle_mode = TRUE;
-        parse_play_command(session, buffer, node);
+        sp_playlist* pl = parse_play_command(session, buffer, node);
+        playthatlist(session, pl, node);
 
     } else if(strcmp(buffer, "pause") == 0 || strcmp(buffer, "p") == 0) {
         player_pause(session);

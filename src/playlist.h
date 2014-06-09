@@ -8,4 +8,4 @@ void shuffle(sp_playlist* playlist);
 void playlist_play_track(sp_session* session, sp_track *track);
 sp_playlist* playlist_play_by_index(sp_session *session, sp_playlistcontainer *pc, int index);
 sp_playlist* playlist_find_by_name(sp_playlistcontainer* pc, char *name);
-void playqueue_go_next(sp_session *session, struct play_queue* node); 
+void playqueue_go_next(sp_session *session, struct play_queue** node); 
