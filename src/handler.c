@@ -38,7 +38,6 @@ void set_active_playlist(sp_session *session, sp_playlist *pl, struct play_queue
 sp_playlist* parse_play_command(sp_session* session, char *buffer,
         struct play_queue* node)
 {
-    printf("parse play command");
     sp_playlist *playlist = NULL;
 
     /* split on ' ', leaving just the name or id of the playlist */
@@ -100,7 +99,17 @@ void handle_keyboard(sp_session *session, struct play_queue* node)
         if(pl != NULL) printf("queueadd: %s\n", sp_playlist_name(pl));
         else{ printf("no playlist\n"); return; }
 
-        sp_track* track = pl_find_song_by_id(pl, 8);
+        int index;
+        char input[10];
+        fputs("Song number: ", stdout);
+        fgets(input, sizeof(input) - 1, stdin);
+        sscanf(input, "%d", &index);
+        if(sp_playlist_num_tracks(pl) < index) {
+            printf("index too high!\n");
+            return;
+        }
+    
+        sp_track* track = pl_find_song_by_id(pl, index);
         if(track != NULL) queue_add_first(node, track);
 
     } else if (strcmp(buffer, "list songs") == 0 ) { 

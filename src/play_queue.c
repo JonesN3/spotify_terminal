@@ -60,3 +60,8 @@ void queue_print(struct play_queue *node)
     }
     printf("done!\n");
 }
+
+void queue_free(struct play_queue *node)
+{
+
+}
