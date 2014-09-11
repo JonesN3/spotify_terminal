@@ -78,14 +78,23 @@ void playqueue_go_next(sp_session *session, struct play_queue** node)
 
     struct play_queue *current = *node;
     struct play_queue *tmp = NULL;
-
+    debug("playqueue_go_next\n");
     //current = current->next;
+    if(current == NULL) {
+	printf("end of queue 2\n");
+	return;
+    }
 
     tmp = current->next;
+    if(tmp == NULL) {
+	printf("end of queue\n");
+	return;
+    }	
     current->next = tmp->next;
     free(tmp);
 
     play_queue(session, current->next);
+	debug("end of go_next");
     //playlist_play_track(session, current->next->track);
 }
 
