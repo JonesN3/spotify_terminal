@@ -57,8 +57,9 @@ sp_playlist* parse_play_command(sp_session* session, char *buffer,
     /* Check playlist name first */
     playlist = playlist_find_by_name(pc, tok);
     if(playlist != NULL){
+	printf("Loading playlist %s\n", tok);
         set_active_playlist(session, playlist, node);
-        return NULL;
+        return playlist;
     }
 
     /* Playlist name not found. Fallback on index */
@@ -77,7 +78,11 @@ sp_playlist* parse_play_command(sp_session* session, char *buffer,
     printf("Could not find a playlist with name '%s'\n", buffer + strlen("play ") );
     return NULL;
 }
- 
+
+/**
+* Handler to check user input, and see if it matches any avaible commands.
+* Will call the right methods for executing commands
+*/  
 void handle_keyboard(sp_session *session, struct play_queue* node) 
 {
     char buffer[1024];
@@ -131,7 +136,7 @@ void handle_keyboard(sp_session *session, struct play_queue* node)
     }else if(strncmp(buffer, "play", strlen("play")) == 0){
         player_reset();
         sp_playlist* pl = parse_play_command(session, buffer, node);
-        playthatlist(session, pl, node);
+        if(pl!=NULL) playthatlist(session, pl, node);
 
     }else if(strncmp(buffer, "shuffle", strlen("shuffle")) == 0){
         player_reset();

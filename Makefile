@@ -1,6 +1,6 @@
 CC      := gcc
 PKGS	:= libspotify alsa
-CFLAGS  := -g -Wall `pkg-config --cflags $(PKGS)`
+CFLAGS  := -g -Wall -DDEBUG -g `pkg-config --cflags $(PKGS)`
 LIBS    := `pkg-config --libs $(PKGS)` -lpthread 
 
 TARGET	:= spot

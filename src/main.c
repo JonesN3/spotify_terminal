@@ -321,6 +321,11 @@ void check_playlist_status(sp_playlist *playlist)
     printf("number of tracks %d\n", sp_playlist_num_tracks(playlist));
 }
 
+/**
+ * The main method, contains a select loop. 
+ * Checks for keyboard input, and if nothing is recevied,
+ * processes the libspotfy events 
+ */
 int main(void)
 {
     int select_ret;
