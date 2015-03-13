@@ -30,7 +30,7 @@ int playlist_loading = 0;
 
 int playlist_playing = 0;
 int playlist_index;
-int shuffle_mode = 0;
+int shuffle_mode = 1;
 int g_playing;
 
 int *g_shuffle_array;
@@ -38,6 +38,7 @@ int *g_shuffle_array;
 /* a container with all the playlist we want */
 sp_playlistcontainer* playlist_container;
 struct play_queue *queue_entry = NULL;
+struct queue_entry *qu_entry = NULL;
 
 /**
  * About callbacks
@@ -128,6 +129,7 @@ static void logged_in(sp_session *session, sp_error error)
     pc = sp_session_playlistcontainer(session);
     sp_playlistcontainer_add_callbacks( pc, &pc_callbacks, NULL);
     g_logged_in = 1;
+    shuffle_mode = 1;
     printf("logged in\n");
 }
 
@@ -260,6 +262,8 @@ void init(void)
     pthread_cond_init(&promt_cond, NULL);
 
     queue_entry = malloc(sizeof(struct play_queue));
+	qu_entry = malloc(sizeof(struct play_queue));
+	qu_entry->size = 0;
     queue_entry->next = NULL;
 
     /* create the spotify session */

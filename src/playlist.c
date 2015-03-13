@@ -7,6 +7,7 @@
 sp_playlist *current_playlist;
 int playlist_tracks, playlist_index;
 extern sp_session *g_session; 
+extern struct queue_entry *qu_entry;
 
 extern int playlist_playing;
 extern int shuffle_mode;
@@ -83,6 +84,7 @@ void playqueue_go_next(sp_session *session, struct play_queue** node)
 
     tmp = current->next;
     current->next = tmp->next;
+	qu_entry->size--;
     free(tmp);
 
     play_queue(session, current->next);
