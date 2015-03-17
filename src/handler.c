@@ -118,7 +118,7 @@ void handle_keyboard(sp_session *session, struct play_queue* node)
         }
     
         sp_track* track = pl_find_song_by_id(pl, index);
-        if(track != NULL) queue_add_first(node, track);
+        if(track != NULL) queue_add_first(track);
 
     } else if (strcmp(buffer, "list songs") == 0 ) { 
         sp_playlist* pl = playlist_find_by_num(session, pc);
@@ -148,10 +148,6 @@ void handle_keyboard(sp_session *session, struct play_queue* node)
         player_pause(session);
 
     } else if (strcmp(buffer, "next") == 0 || strcmp(buffer, "n") == 0) {
-        if(!playlist_playing) {
-            printf("There is no playlist playing!\n\n");
-            return;
-        }
         end_track(session);
 
     } else if (strcmp(buffer, "stop") == 0) {

@@ -31,6 +31,27 @@ void queue_add(sp_track *track)
     queue_entry->tail = current;
     current->next = NULL;
 }
+
+void queue_add_first(sp_track *track)
+{
+    struct play_queue *current;
+    struct play_queue *tmp;
+
+    tmp = malloc(sizeof(struct play_queue));
+    tmp->track = track;
+    tmp->id = -1;
+    
+    if(queue_entry->head == NULL) {
+        queue_entry->head = tmp;
+        queue_entry->tail = tmp;
+        tmp->next = NULL;
+    } else {
+        current = queue_entry->head;
+        tmp->next = current->next;
+        current->next = tmp;
+    }
+	queue_entry->size++;
+}
  
 void queue_remove(int id)
 {
@@ -101,21 +122,6 @@ int rand_lim(int limit) {
     return retval;
 }
 
-void queue_add_first(struct play_queue *node, sp_track *track)
-{
-    printf("adding '%s' to top of queue\n", sp_track_name(track));
-    struct play_queue *current = node;
-    struct play_queue *tmp = NULL;
-    
-    current = current->next;
-    tmp = malloc(sizeof(struct play_queue));
-    tmp->track = track;
-    tmp->id = id_tracker;
-    id_tracker++;
-    tmp->next = current->next;
-    current->next = tmp;
-	queue_entry->size++;
-}
 
 void queue_add_playlist(sp_playlist *playlist)
 {

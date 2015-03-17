@@ -50,5 +50,6 @@ static void SP_CALLCONV search_complete(sp_search *search, void *userdata)
 
 	printf("Found track!\n");
 	sp_track *track = sp_search_track(search, 0);
-	play((sp_session*)userdata, track);
+    queue_add_first(track);
+    printf("Track added next in queue\n");
 }
