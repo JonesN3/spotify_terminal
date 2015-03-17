@@ -47,7 +47,7 @@ void print_tracks_in_playlist(sp_session *session, sp_playlist* playlist)
 	}
 }
 
-void playthatlist(sp_session *session, sp_playlist* pl, struct play_queue* node)
+void playthatlist(sp_session *session, sp_playlist* pl, q_entry *head)
 {
     printf("\nPlay that playlist!\n");
 
@@ -66,38 +66,12 @@ void playthatlist(sp_session *session, sp_playlist* pl, struct play_queue* node)
     
     playlist_play_track(session, track);
     printf("asdfsadf\n");
-    queue_add_playlist(node, pl);
+    queue_add_playlist(pl);
 }
 
 int play_song_in_playlist(sp_session *session, int playlist, int index)
 {
     return -1;
-}
-
-void playqueue_go_next(sp_session *session, struct play_queue** node) 
-{
-
-    struct play_queue *current = *node;
-    struct play_queue *tmp = NULL;
-    debug("playqueue_go_next\n");
-    //current = current->next;
-    if(current == NULL) {
-	printf("end of queue 2\n");
-	return;
-    }
-
-    tmp = current->next;
-    if(tmp == NULL) {
-	printf("end of queue\n");
-	return;
-    }	
-    current->next = tmp->next;
-	qu_entry->size--;
-    free(tmp);
-
-    play_queue(session, current->next);
-	debug("end of go_next");
-    //playlist_play_track(session, current->next->track);
 }
 
 void playlist_go_next(sp_session *session, sp_playlist* pl, int index)

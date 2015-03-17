@@ -37,8 +37,7 @@ int *g_shuffle_array;
 
 /* a container with all the playlist we want */
 sp_playlistcontainer* playlist_container;
-struct play_queue *queue_entry = NULL;
-struct queue_entry *qu_entry = NULL;
+q_entry *queue_entry = NULL;
 
 /**
  * About callbacks
@@ -196,9 +195,7 @@ static void on_end_of_track(sp_session *session)
     audio_fifo_flush(&g_audiofifo);
     sp_session_player_play(session, 0);
     notify_main_thread(g_session);
-
-    playqueue_go_next(session, &queue_entry); 
-
+    queue_go_next(g_session);
     //if(playlist_playing) playlist_go_next(g_session, g_playlist, ++playlist_index);
 }
 
@@ -261,10 +258,10 @@ void init(void)
     pthread_cond_init(&notify_cond, NULL);
     pthread_cond_init(&promt_cond, NULL);
 
-    queue_entry = malloc(sizeof(struct play_queue));
-	qu_entry = malloc(sizeof(struct play_queue));
-	qu_entry->size = 0;
-    queue_entry->next = NULL;
+	queue_entry = malloc(sizeof(q_entry));
+	queue_entry->size = 0;
+    queue_entry->head = NULL;
+    queue_entry->tail = NULL;
 
     /* create the spotify session */
     error = sp_session_create(&session_config, &session);

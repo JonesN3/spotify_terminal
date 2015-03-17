@@ -8,15 +8,17 @@ struct play_queue {
 };
 
 /* entry for the play_queue which contains the size */
-struct queue_entry {
+typedef struct {
 	int size;
 	struct play_queue *head;
-}q_entry;
+    struct play_queue *tail;
+} q_entry;
 
-void queue_add(struct play_queue *node, sp_track *track);
-void queue_shuffle(struct play_queue *node);
+void queue_add(sp_track *track);
+void queue_shuffle();
 int rand_lim(int limit); 
 void queue_remove(int id);
+void queue_go_next(sp_session* s);
 void queue_add_first(struct play_queue *node, sp_track *track);
-void queue_add_playlist(struct play_queue *node, sp_playlist *playlist);
+void queue_add_playlist(sp_playlist *playlist);
 void queue_print(struct play_queue *node); 

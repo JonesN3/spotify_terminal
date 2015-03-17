@@ -98,7 +98,7 @@ void handle_keyboard(sp_session *session, struct play_queue* node)
         print_playlists(session, pc);
 
 	} else if(strcmp(buffer, "qshuffle") == 0) {
-		queue_shuffle(node);
+		queue_shuffle();
 
     } else if (strcmp(buffer, "queueadd") == 0) {
         sp_playlist* pl = parse_play_command(session, buffer, node);

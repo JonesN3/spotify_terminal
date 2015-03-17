@@ -1,23 +1,35 @@
 #include "includes.h"
 #include <time.h>
 int id_tracker;
-extern struct queue_entry *qu_entry;
+extern q_entry *queue_entry;
 
-void queue_add(struct play_queue *node, sp_track *track)
+void queue_info()
 {
-    struct play_queue *current = node;
+    printf("--queue_info--\n");
+    printf("queue_head: %s, queue_tail: %s\n", sp_track_name(queue_entry->head->track),
+            sp_track_name(queue_entry->tail->track));
+    printf("size: %d\n", queue_entry->size);
+}
 
-    while(current->next != NULL) {
-       current = current->next; 
-   }
-    current->next = malloc(sizeof(struct play_queue));
+void queue_add(sp_track *track)
+{
+    struct play_queue *current;
 
-    current = current->next;
+    if(queue_entry->head == NULL) {
+        queue_entry->head = malloc(sizeof(struct play_queue));
+        queue_entry->tail = malloc(sizeof(struct play_queue));
+        current = queue_entry->head;
+    } else {
+        current = queue_entry->tail;
+        current->next = malloc(sizeof(struct play_queue));
+        current = current->next;
+    }
+
     current->track = track;
-    current->id = id_tracker;
-    id_tracker++;
+    current->id = 99;
+	queue_entry->size++;
+    queue_entry->tail = current;
     current->next = NULL;
-	qu_entry->size++;
 }
  
 void queue_remove(int id)
@@ -25,15 +37,14 @@ void queue_remove(int id)
 
 }
 
-void queue_shuffle(struct play_queue *node)
+void queue_shuffle()
 {
-	printf("queue size: %d \n", qu_entry->size);
-	struct play_queue *shuffle_array[qu_entry->size-1];
+	printf("queue size: %d \n", queue_entry->size);
+	struct play_queue *shuffle_array[queue_entry->size-1];
 	int cnt = 0;
 
-	struct play_queue *current = node;
-	current = current->next;
-	while(cnt < qu_entry->size) {
+	struct play_queue *current = queue_entry->head;
+	while(cnt < queue_entry->size) {
 		printf("current track: %s", sp_track_name(current->track));
 		printf(" %d\n", cnt);
 		shuffle_array[cnt] = current;
@@ -41,27 +52,37 @@ void queue_shuffle(struct play_queue *node)
 		cnt++;
 	}
 
-	int i = qu_entry->size-1;
+	int i = queue_entry->size-1;
 	struct play_queue *tmp;
-	for(i = qu_entry->size-1; i > 0; i--) {
+	for(i = queue_entry->size-1; i > 0; i--) {
 		int rand = rand_lim(i);
-		printf("random: %d, ", rand);
+		printf("random: %d, i: %d \n", rand, i);
 		tmp = shuffle_array[rand];
 		shuffle_array[rand] = shuffle_array[i];
 		shuffle_array[i] = tmp;
 	}
 	printf("\n");
 	
+    printf("%d\n", queue_entry->size);
 	cnt = 0;
-	current = node;
-	current = shuffle_array[0];
-	while(cnt < qu_entry->size-1) {
-		printf("current track: %s cnt: %d\n", sp_track_name(current->track), cnt);
-		cnt++;
+    queue_entry->head = shuffle_array[0];
+	current = queue_entry->head;
+	printf("current track: %s cnt: %d\n", sp_track_name(current->track), cnt);
+    cnt++;
+	while(cnt < queue_entry->size-1) {
 		current->next = shuffle_array[cnt];
 		current = current->next;
+		printf("current track: %s cnt: %d\n", sp_track_name(current->track), cnt);
+		cnt++;
 	}
-	current->next = NULL;
+    current->next = shuffle_array[cnt];
+    current = current->next;
+    queue_entry->tail = current;
+    printf("current track: %s cnt: %d\n", sp_track_name(current->track), cnt);
+    current->next = NULL;
+    queue_info();
+    printf("\n\n");
+
 }
 
 /* correct way to get random number withing a limit */
@@ -93,27 +114,38 @@ void queue_add_first(struct play_queue *node, sp_track *track)
     id_tracker++;
     tmp->next = current->next;
     current->next = tmp;
-	qu_entry->size++;
+	queue_entry->size++;
 }
 
-void queue_add_playlist(struct play_queue *node, sp_playlist *playlist)
+void queue_add_playlist(sp_playlist *playlist)
 {
     int i = 0;
     
     for(i = 0; i < sp_playlist_num_tracks(playlist) - 1; i++) {
-        queue_add(node, sp_playlist_track(playlist, i));
+        queue_add(sp_playlist_track(playlist, i));
     }
+}
+
+void queue_go_next(sp_session* s)
+{
+    queue_entry->head = queue_entry->head->next;
+    queue_entry->size--;
+    if(queue_entry->head == NULL) {
+        printf("End of queue!");
+        return;
+    }
+    struct play_queue *current = queue_entry->head;
+    play(s, current->track);
+    
 }
 
 void queue_print(struct play_queue *node) 
 {
     printf("printing queue\n");
-	printf("queue size: %d\n", qu_entry->size);
-    struct play_queue *current = node;
-    current = current->next;
-    sp_track *cur_track;
+	printf("queue size: %d\n", queue_entry->size);
+    struct play_queue *current = queue_entry->head;
 
-	int i = 0;
+    int i;
     while(current != NULL) {
         printf("%d: %s\n", i++, sp_track_name(current->track));
         current = current->next;
