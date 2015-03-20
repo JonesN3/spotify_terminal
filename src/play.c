@@ -6,6 +6,7 @@ extern int playlist_index;
 extern int shuffle_mode;
 extern sp_playlist* g_playlist;
 int playing = 0;
+int next_timeout;
 
 void play(sp_session *session, sp_track *track)
 {
@@ -14,9 +15,17 @@ void play(sp_session *session, sp_track *track)
 	g_playing = 1;
 	playing = 1;
 	debug("loading track into player");
+    
+    
+    if(!sp_track_is_loaded(track)) printf("Waiting for track to load. This is a one time thing, metadata will be chaced on disk\n");
+    while (!sp_track_is_loaded(track) ) {
+        sp_session_process_events(session, &next_timeout);
+    }
+
 	error = sp_session_player_load(session, track);
 	if (error != SP_ERROR_OK) {
 		fprintf(stderr, "\nError: %s\n", sp_error_message(error));
+        return;
 	}
 
 	debug("calling sp_session_player_play");

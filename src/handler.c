@@ -141,7 +141,13 @@ void handle_keyboard(sp_session *session, struct play_queue* node)
     }else if(strncmp(buffer, "play", strlen("play")) == 0){
         player_reset();
         sp_playlist* pl = parse_play_command(session, buffer, node);
-        if(pl!=NULL) playthatlist(session, pl, node);
+        if(pl!=NULL) queue_add_playlist(pl);
+        else { 
+            printf("ERROR playlist is null\n");
+            return;
+        }
+        queue_go_next(session);
+
 
     }else if(strncmp(buffer, "shuffle", strlen("shuffle")) == 0){
         player_reset();

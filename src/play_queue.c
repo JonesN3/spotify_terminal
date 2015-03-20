@@ -201,3 +201,8 @@ void queue_free()
         cur = tmp;
     }
 }
+
+queue_play()
+{
+
+}
