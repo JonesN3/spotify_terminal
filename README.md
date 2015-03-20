@@ -3,7 +3,7 @@ spotify_terminal
 A project to create a simple, but fuctional terminal spotify client for a linux enviorment. 
 The project is in early development, and cannot be considered stable!
 
-The aim of this program is to create a usable spotify client that have few dependencies,
+The aim of this project is to create a usable spotify client that have few dependencies,
 so it can be used on virtually any linux machine.
 
 Dependencies
