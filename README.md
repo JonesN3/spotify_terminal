@@ -4,7 +4,12 @@ A project to create a simple and minimal, yet fuctional terminal spotify client 
 The project is in early development, and cannot be considered stable!
 
 The aim of this project is to create a usable spotify client that have few dependencies,
-so it can be used on virtually any linux machine.
+so it can be used on virtually any linux machine. 
+
+As of now it supports adding playlists to a play queue
+by using name or index number of the playlist. The queue can be shuffled. You can also search
+for songs or select a spesific song in a playlist and add those to the queue. The play
+queue, playlists, and the playlist rootlist are printable.
 
 Dependencies
 ------------
