@@ -31,11 +31,10 @@ Libspotify howto
 If you have root access, pretty simple. Just extract the tar, go to the folder, and run 
 <code>'make install'</code>.
 
-If you don't have root access, you can install libspotify in your home folder. For what i will explain i will
-that you installed it to '~/usr/local/lib', with the command
+If you don't have root access, you can install libspotify in your home folder. For what i will explain i will assume that you hvave installed it to '~/usr/local/lib', with the command
 <code>'make install prefix=~/usr/local/lib'</code> 
 
-If you stilled it into the home folder, you have to update some PATHS, if you already haven't
+If you installed it into the home folder, you have to update some PATHS, if you already haven't
 
 <code>export PKG_CONFIG_PATH=$HOME/local/lib/pkgconfig:$PKG_CONFIG_PATH</code>
 
