@@ -1,16 +1,24 @@
 #include "includes.h"
 #include <time.h>
-int id_tracker;
+
+/* global variable for the entry of the queue */
 extern q_entry *queue_entry;
 
+/*
+ * Print some useful info about the queue
+ */
 void queue_info()
 {
     printf("--queue_info--\n");
-    printf("queue_head: %s, queue_tail: %s\n", sp_track_name(queue_entry->head->track),
+    printf("queue_head: %s, queue_tail: %s\n", 
+            sp_track_name(queue_entry->head->track),
             sp_track_name(queue_entry->tail->track));
     printf("size: %d\n", queue_entry->size);
 }
 
+/*
+ * Add track to the back (tail) of the queue
+ */
 void queue_add(sp_track *track)
 {
     struct play_queue *current;
@@ -32,6 +40,9 @@ void queue_add(sp_track *track)
     current->next = NULL;
 }
 
+/* 
+ * Add track to the start (head) of the queue
+ */
 void queue_add_first(sp_track *track)
 {
     struct play_queue *current;
@@ -39,7 +50,7 @@ void queue_add_first(sp_track *track)
 
     tmp = malloc(sizeof(struct play_queue));
     tmp->track = track;
-    tmp->id = -1;
+    tmp->id = -1; /* remove this */
     
     if(queue_entry->head == NULL) {
         queue_entry->head = tmp;
@@ -58,16 +69,25 @@ void queue_remove(int id)
 
 }
 
+/*
+ * Randomly shuffle the entire play queue
+ *
+ * Moves the entrie queue into an array of play_queue pointers.
+ * Shuffles the array, and relink the pointers from the array
+ * as the play_queue.
+ */
 void queue_shuffle()
 {
-	printf("queue size: %d \n", queue_entry->size);
 	struct play_queue *shuffle_array[queue_entry->size-1];
 	int cnt = 0;
 
 	struct play_queue *current = queue_entry->head;
+    if(current == NULL || current->next == NULL) {
+        printf("Not enough tracks in queue to shuffle\n");
+        return;
+    }
+
 	while(cnt < queue_entry->size) {
-		printf("current track: %s", sp_track_name(current->track));
-		printf(" %d\n", cnt);
 		shuffle_array[cnt] = current;
 		current = current->next;
 		cnt++;
@@ -75,42 +95,37 @@ void queue_shuffle()
 
 	int i = queue_entry->size-1;
 	struct play_queue *tmp;
+
 	for(i = queue_entry->size-1; i > 0; i--) {
 		int rand = rand_lim(i);
-		printf("random: %d, i: %d \n", rand, i);
 		tmp = shuffle_array[rand];
 		shuffle_array[rand] = shuffle_array[i];
 		shuffle_array[i] = tmp;
 	}
-	printf("\n");
-	
-    printf("%d\n", queue_entry->size);
+
 	cnt = 0;
     queue_entry->head = shuffle_array[0];
 	current = queue_entry->head;
-	printf("current track: %s cnt: %d\n", sp_track_name(current->track), cnt);
     cnt++;
+
 	while(cnt < queue_entry->size-1) {
 		current->next = shuffle_array[cnt];
 		current = current->next;
-		printf("current track: %s cnt: %d\n", sp_track_name(current->track), cnt);
 		cnt++;
 	}
+
     current->next = shuffle_array[cnt];
     current = current->next;
     queue_entry->tail = current;
-    printf("current track: %s cnt: %d\n", sp_track_name(current->track), cnt);
     current->next = NULL;
-    queue_info();
-    printf("\n\n");
 
+    queue_info();
 }
 
-/* correct way to get random number withing a limit */
-int rand_lim(int limit) {
-/* return a random number between 0 and limit inclusive.
+/* 
+ * Correct way to get random number withing a limit 
  */
-
+int rand_lim(int limit) {
 	srand(time(NULL));	
     int divisor = RAND_MAX/(limit+1);
     int retval;
@@ -122,7 +137,9 @@ int rand_lim(int limit) {
     return retval;
 }
 
-
+/*
+ * Add an entire playlist to the queue
+ */
 void queue_add_playlist(sp_playlist *playlist)
 {
     int i = 0;
@@ -132,8 +149,14 @@ void queue_add_playlist(sp_playlist *playlist)
     }
 }
 
+/*
+ * Jump to next in queue and play the track
+ */
 void queue_go_next(sp_session* s)
 {
+    struct play_queue *fre;
+    fre = queue_entry->head;
+    free(fre);
     queue_entry->head = queue_entry->head->next;
     queue_entry->size--;
     if(queue_entry->head == NULL) {
@@ -145,6 +168,9 @@ void queue_go_next(sp_session* s)
     
 }
 
+/*
+ * Print the full queue
+ */
 void queue_print(struct play_queue *node) 
 {
     printf("printing queue\n");
@@ -159,7 +185,19 @@ void queue_print(struct play_queue *node)
     printf("done!\n");
 }
 
-void queue_free(struct play_queue *node)
+/* 
+ * Free memory of entire queue. Used for exit of program 
+ */
+void queue_free()
 {
-
+    struct play_queue *tmp;
+    struct play_queue *cur;
+    
+    cur = queue_entry->head;
+    
+    while(cur != NULL) {
+        tmp = cur->next;
+        free(cur);
+        cur = tmp;
+    }
 }

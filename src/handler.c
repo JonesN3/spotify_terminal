@@ -9,12 +9,17 @@ extern sp_playlistcontainer *pc;
 void print_commands()
 {
     printf("Spotify_terminal, commands:\n" 
-            "'search'        - Search by artist and/or song\n"
-            "'list' 'ls'     - List playlist for user\n"
-            "'play'          - Select and play a playlist (by number)\n"
-            "'next' 'n'      - Go to next track in playlist\n"
+            "'search'        - Search and add first hit to top of queue\n"
+            "'list' 'ls'     - List all playlists for user\n"
+            "'play'          - Add a playlist to the queue and start playing\n"
+            "'next' 'n'      - Go to next track in the queue\n"
+            "'qshuffle'      - Randomly shuffle the play queue\n"
+            "'queue'         - Print the play queue\n"
             "'help'          - Print this\n"
+            "\n"
+            "Everything select to play will be added to a play queue\n"
             "\n");
+    fflush(stdout);
 }
 
 void player_reset()
@@ -143,6 +148,7 @@ void handle_keyboard(sp_session *session, struct play_queue* node)
         shuffle_mode = TRUE;
         sp_playlist* pl = parse_play_command(session, buffer, node);
         playthatlist(session, pl, node);
+        queue_shuffle();
 
     } else if(strcmp(buffer, "pause") == 0 || strcmp(buffer, "p") == 0) {
         player_pause(session);
@@ -155,10 +161,14 @@ void handle_keyboard(sp_session *session, struct play_queue* node)
     } else if (strcmp(buffer, "info") == 0) {
         play_info();
     } else if (strcmp(buffer, "quit") == 0) {
+        queue_free();
         quit_program(session);
     } else {
-        printf("Unkown command!");
+        printf("Unkown command!\n");
     }
+    printf("> ");
+    fflush(stdout);
+
     return;
 }
 

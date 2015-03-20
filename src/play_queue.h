@@ -4,21 +4,22 @@ struct play_queue {
     char* playlist_name;
     int id;
     struct play_queue *next;
-	struct play_queue *tail;
 };
 
-/* entry for the play_queue which contains the size */
+/* entry for the play_queue which points to the play_queue*/
 typedef struct {
 	int size;
 	struct play_queue *head;
     struct play_queue *tail;
+    struct play_queue *playing;
 } q_entry;
 
-void queue_add(sp_track *track);
 void queue_shuffle();
 int rand_lim(int limit); 
 void queue_remove(int id);
 void queue_go_next(sp_session* s);
+void queue_add(sp_track *track);
 void queue_add_first(sp_track *track);
 void queue_add_playlist(sp_playlist *playlist);
 void queue_print(struct play_queue *node); 
+void queue_free();

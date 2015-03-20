@@ -33,6 +33,10 @@ int playlist_index;
 int shuffle_mode = 1;
 int g_playing;
 
+/* new */
+int playlist_loaded = FALSE;
+int is_logged_in = FALSE;
+
 int *g_shuffle_array;
 
 /* a container with all the playlist we want */
@@ -104,8 +108,9 @@ static void playlist_removed(sp_playlistcontainer *pc, sp_playlist *pl,
 static void container_loaded(sp_playlistcontainer *pc, void *userdata)
 {
     debug("Callback: playlistcontainer_loaded");
-    fprintf(stderr, "jukebox: Rootlist synchronized (%d playlists)\n",
+    fprintf(stderr, "Rootlist synchronized (%d playlists)\n",
             sp_playlistcontainer_num_playlists(pc));
+    playlist_loaded = TRUE;
 }
 
 /* Register playlistcontainer callbacks */
@@ -128,7 +133,8 @@ static void logged_in(sp_session *session, sp_error error)
     pc = sp_session_playlistcontainer(session);
     sp_playlistcontainer_add_callbacks( pc, &pc_callbacks, NULL);
     g_logged_in = 1;
-    shuffle_mode = 1;
+   
+    is_logged_in = TRUE;
     printf("logged in\n");
 }
 
@@ -196,7 +202,6 @@ static void on_end_of_track(sp_session *session)
     sp_session_player_play(session, 0);
     notify_main_thread(g_session);
     queue_go_next(g_session);
-    //if(playlist_playing) playlist_go_next(g_session, g_playlist, ++playlist_index);
 }
 
 static void message_to_user(sp_session *s, const char* msg)
@@ -318,6 +323,33 @@ void check_playlist_status(sp_playlist *playlist)
     printf("number of tracks %d\n", sp_playlist_num_tracks(playlist));
 }
 
+/* 
+ * Log in and wait for rootlist to be loaded
+ */
+void launch(void)
+{   
+    printf("Welcome to spotify_terminal\n");
+    printf("Using libspotify %s\n", sp_build_id());
+    init();
+    
+    get_user_info();
+    printf("Logging in user: '%s'... \n", username);
+    usleep(500000);
+    log_in();
+    while(is_logged_in != TRUE) {
+        sp_session_process_events(g_session, &next_timeout);
+    }
+    printf("Loading playlists... \n");
+    usleep(500000);
+    sp_session_process_events(g_session, &next_timeout);
+    while(playlist_loaded != TRUE) {
+        sp_session_process_events(g_session, &next_timeout);
+    }
+    printf("ready!\n");
+    printf("> ");
+    fflush(stdout);
+}
+
 /**
  * The main method, contains a select loop. 
  * Checks for keyboard input, and if nothing is recevied,
@@ -327,17 +359,9 @@ int main(void)
 {
     int select_ret;
     fd_set  read_set;
-
     struct timeval tv;
 
-    printf("Welcome to spotify_terminal\n");
-    printf("Using libspotify %s\n", sp_build_id());
-    init();
-    get_user_info();
-    printf("User: '%s'\n", username);
-    log_in();
-    sp_session_process_events(g_session, &next_timeout);
-    printf("ready\n");
+    launch();
 
     while(1) {
         FD_ZERO( &read_set );
