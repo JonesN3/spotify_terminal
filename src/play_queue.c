@@ -202,7 +202,3 @@ void queue_free()
     }
 }
 
-queue_play()
-{
-
-}
