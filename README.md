@@ -9,7 +9,8 @@ so it can be used on virtually any linux machine.
 As of now it supports adding playlists to a play queue
 by using name or index number of the playlist. The queue can be shuffled. You can also search
 for songs or select a spesific song in a playlist and add those to the queue. The play
-queue, playlists, and the playlist rootlist are printable.
+queue, playlists, and the playlist rootlist are printable. All operations are given 
+as a plain text command, with additional queries when needed. 
 
 Dependencies
 ------------
