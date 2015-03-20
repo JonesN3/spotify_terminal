@@ -1,7 +1,16 @@
 spotify_terminal
 ================
-A project to create a simple, but fuctional terminal spotify client for a linux enviorment. 
+A project to create a simple and minimal, yet fuctional terminal spotify client for a linux enviorment. 
 The project is in early development, and cannot be considered stable!
+
+The aim of this project is to create a usable spotify client that have few dependencies,
+so it can be used on virtually any linux machine. 
+
+As of now it supports adding playlists to a play queue
+by using name or index number of the playlist. The queue can be shuffled. You can also search
+for songs or select a spesific song in a playlist and add those to the queue. The play
+queue, playlists, and the playlist rootlist are printable. All operations are given 
+as a plain text command, with additional queries when needed. 
 
 Dependencies
 ------------
@@ -22,11 +31,10 @@ Libspotify howto
 If you have root access, pretty simple. Just extract the tar, go to the folder, and run 
 <code>'make install'</code>.
 
-If you don't have root access, you can install libspotify in your home folder. For what i will explain i will
-that you installed it to '~/usr/local/lib', with the command
+If you don't have root access, you can install libspotify in your home folder. For what i will explain i will assume that you hvave installed it to '~/usr/local/lib', with the command
 <code>'make install prefix=~/usr/local/lib'</code> 
 
-If you stilled it into the home folder, you have to update some PATHS, if you already haven't
+If you installed it into the home folder, you have to update some PATHS, if you already haven't
 
 <code>export PKG_CONFIG_PATH=$HOME/local/lib/pkgconfig:$PKG_CONFIG_PATH</code>
 
