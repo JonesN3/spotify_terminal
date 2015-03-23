@@ -9,17 +9,19 @@ extern sp_playlistcontainer *pc;
 void print_commands()
 {
     printf("Spotify_terminal, commands:\n" 
-            "'search'        - Search and add first hit to top of queue\n"
-            "'list' 'ls'     - List all playlists for user\n"
-            "'play'          - Add a playlist to the queue and start playing\n"
-            "'next' 'n'      - Go to next track in the queue\n"
-            "'qshuffle'      - Randomly shuffle the play queue\n"
-            "'queue'         - Print the play queue\n"
-            "'help'          - Print this\n"
-            "\n"
-            "Everything select to play will be added to a play queue\n"
-            "\n");
-    fflush(stdout);
+"'search'                   - Search and add first hit to top of queue\n"
+"'list' | 'ls' <playlist>   - List all playlists for user\n"
+"'play <playlist>'          - Start playing a playlist\n"
+"'next' 'n'                 - Go to next track in the queue\n"
+"'shuffle <playlist>'       - Shuffle a playlist and start playing\n"
+"'qshuffle'                 - Randomly shuffle the play queue\n"
+"'queue'                    - Print the play queue\n"
+"'queueadd'                 - Get input for a playlist and song# and add to queue\n"
+"'help'                     - Print this\n"
+"\n"
+"Everything you select to play will be added to a play queue\n"
+"\n");
+fflush(stdout);
 }
 
 void player_reset()
