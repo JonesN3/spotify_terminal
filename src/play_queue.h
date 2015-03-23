@@ -9,6 +9,7 @@ struct play_queue {
 /* entry for the play_queue which points to the play_queue*/
 typedef struct {
 	int size;
+	int is_playing;
 	struct play_queue *head;
     struct play_queue *tail;
     struct play_queue *playing;

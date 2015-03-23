@@ -63,7 +63,6 @@ static void tracks_added(sp_playlist *pl, sp_track * const *tracks,
         int num_tracks, int position, void *userdata)
 {
     printf("Callback tracks_added: %d tracks were added\n", num_tracks);
-    playthatlist(g_session, pl, queue_entry);
     fflush(stdout);
 }
 
@@ -265,6 +264,7 @@ void init(void)
 
 	queue_entry = malloc(sizeof(q_entry));
 	queue_entry->size = 0;
+	queue_entry->is_playing = FALSE;
     queue_entry->head = NULL;
     queue_entry->tail = NULL;
 
@@ -288,8 +288,7 @@ void get_user_info(void)
 
     fputs("username: ", stdout);
     fgets(username_in, 30, stdin);
-    fputs("password: ", stdout);
-    fgets(password_in, 30, stdin);
+	password_in = getpass("password: ");
 
     username_in = strtok(username_in, "\n");
     password_in = strtok(password_in, "\n");

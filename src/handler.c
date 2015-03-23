@@ -126,6 +126,7 @@ void handle_keyboard(sp_session *session, struct play_queue* node)
         if(track != NULL) queue_add_first(track);
 
     } else if (strcmp(buffer, "list songs") == 0 ) { 
+	//release all threads
         sp_playlist* pl = playlist_find_by_num(session, pc);
         print_tracks_in_playlist(session, pl);
         
@@ -153,11 +154,17 @@ void handle_keyboard(sp_session *session, struct play_queue* node)
         player_reset();
         shuffle_mode = TRUE;
         sp_playlist* pl = parse_play_command(session, buffer, node);
-        playthatlist(session, pl, node);
+		if(pl!=NULL) queue_add_playlist(pl);
+        else { 
+            printf("ERROR playlist is null\n");
+            return;
+        }
         queue_shuffle();
+        queue_go_next(session);
 
     } else if(strcmp(buffer, "pause") == 0 || strcmp(buffer, "p") == 0) {
         player_pause(session);
+		play_info();
 
     } else if (strcmp(buffer, "next") == 0 || strcmp(buffer, "n") == 0) {
         end_track(session);

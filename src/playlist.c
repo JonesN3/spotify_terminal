@@ -47,28 +47,6 @@ void print_tracks_in_playlist(sp_session *session, sp_playlist* playlist)
 	}
 }
 
-void playthatlist(sp_session *session, sp_playlist* pl, q_entry *head)
-{
-    printf("\nPlay that playlist!\n");
-
-    if(!sp_playlist_is_loaded(pl)) {
-        printf("Playlist is not loaded!\n");
-        return;
-    }
-
-    playlist_playing = TRUE;
-    
-    debug("playing playlist '%s'", sp_playlist_name(pl));
-
-    sp_track* track = sp_playlist_track(pl, 0);
-    shuffle(pl);
-    printf("asdfsadf\n");
-    
-    playlist_play_track(session, track);
-    printf("asdfsadf\n");
-    queue_add_playlist(pl);
-}
-
 int play_song_in_playlist(sp_session *session, int playlist, int index)
 {
     return -1;

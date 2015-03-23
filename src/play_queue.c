@@ -154,6 +154,7 @@ void queue_add_playlist(sp_playlist *playlist)
  */
 void queue_go_next(sp_session* s)
 {
+	queue_entry->is_playing = TRUE;
     struct play_queue *fre;
     fre = queue_entry->head;
     free(fre);

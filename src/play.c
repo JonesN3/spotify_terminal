@@ -8,6 +8,8 @@ extern sp_playlist* g_playlist;
 int playing = 0;
 int next_timeout;
 
+extern q_entry *queue_entry;
+
 void play(sp_session *session, sp_track *track)
 {
 	debug("in player");
@@ -37,9 +39,11 @@ void play(sp_session *session, sp_track *track)
 void player_pause(sp_session *session)
 {
 	if(playing == 1) {
+		queue_entry->is_playing = FALSE;
 		sp_session_player_play(session, 0);
 		playing = 0;
 	} else if(playing == 0) {
+		queue_entry->is_playing = TRUE;
 		sp_session_player_play(session, 1);
 		playing = 1;
 	}
@@ -59,11 +63,9 @@ void play_info(struct play_queue *node)
 	printf("Using libspotify %s\n\n", sp_build_id());
 
 	char ESC=27;
-	printf("## Playing ##\n");
-	if(shuffle_mode) printf("Shuffle mode\n");
-	//if(node->playlist_name != "-1"){ 
-	//printf("Playlist: %s", sp_playlist_name(node->playlist_name));
-	//}
+	if(queue_entry->is_playing) printf("## Playing ##\n");
+	else printf("## Pause ##\n");
+
 	printf("%c[1m",ESC);  /*- turn on bold */
 	printf("%s\n", sp_track_name(current_track));
 	printf("%c[0m",ESC); /* turn off bold */
