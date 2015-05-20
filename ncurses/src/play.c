@@ -33,7 +33,8 @@ void play(sp_session *session, sp_track *track)
 	debug("calling sp_session_player_play");
 	current_track = track;
 	sp_session_player_play(session, 1);
-	play_info(NULL);
+	curses_print_playinfo(current_track);
+	//play_info(NULL);
 }
 
 void player_pause(sp_session *session)

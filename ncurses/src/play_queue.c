@@ -83,7 +83,7 @@ void queue_shuffle()
 
 	struct play_queue *current = queue_entry->head;
     if(current == NULL || current->next == NULL) {
-        printf("Not enough tracks in queue to shuffle\n");
+        //printf("Not enough tracks in queue to shuffle\n");
         return;
     }
 

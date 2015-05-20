@@ -64,7 +64,6 @@ sp_playlist* parse_play_command(sp_session* session, char *buffer,
     /* Check playlist name first */
     playlist = playlist_find_by_name(pc, tok);
     if(playlist != NULL){
-	printf("Loading playlist %s\n", tok);
         set_active_playlist(session, playlist, node);
         return playlist;
     }
@@ -72,19 +71,17 @@ sp_playlist* parse_play_command(sp_session* session, char *buffer,
     /* Playlist name not found. Fallback on index */
     int playlist_id;
     if(sscanf( tok, "%d", &playlist_id ) == 1){
-        printf("Match index!\n");
         playlist = playlist_play_by_index(session, pc, playlist_id);
         if(playlist != NULL){
             set_active_playlist(session, playlist, node);
             return playlist;
         }else {
-             printf("Playlist nr.'%d' is not ready!\n", playlist_id );
             return NULL;
         }
     }
-    printf("Could not find a playlist with name '%s'\n", buffer + strlen("play ") );
     return NULL;
 }
+
 
 /**
 * Handler to check user input, and see if it matches any avaible commands.

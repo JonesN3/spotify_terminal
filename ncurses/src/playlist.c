@@ -111,10 +111,8 @@ sp_playlist* playlist_find_by_name(sp_playlistcontainer *pc, char *name)
     for(i = 0; i < pc_length; i++){
         sp = sp_playlistcontainer_playlist(pc, i);
         if(sp_playlist_is_loaded(sp)){
-            printf(">%s< ?= >%s<\n", name, sp_playlist_name(sp));
             /* Compare name */
             if(strcmp(name, sp_playlist_name(sp)) == 0){
-                printf("Match on %s\n", sp_playlist_name(sp));
                 return sp;
             }
         }

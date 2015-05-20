@@ -402,7 +402,9 @@ int main(void)
 
             default :
                 debug("default");
-                if( FD_ISSET (STDIN_FILENO, &read_set)) handle_keyboard(g_session, queue_entry); 
+                if( FD_ISSET (STDIN_FILENO, &read_set)) 
+					curses_keyboard_handler(g_session, queue_entry);	
+					//handle_keyboard(g_session, queue_entry); 
         }
     }
 }
