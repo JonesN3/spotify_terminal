@@ -12,6 +12,8 @@ for songs or select a spesific song in a playlist and add those to the queue. Th
 queue, playlists, and the playlist rootlist are printable. All operations are given 
 as a plain text command, with additional queries when needed. 
 
+Ncurses version of the program is located in /ncurses. The standard version only uses standard C-print functions.
+
 Dependencies
 ------------
 This program depends on libspotify, a C api develpoed by spotify. 
